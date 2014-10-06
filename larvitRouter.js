@@ -54,13 +54,13 @@ exports.resolve = function(request, callback) {
 				// No static file was found, see if we have a matching controller when resolved from URL
 				var controllerName = pathname.substring(1);
 
-				console.info('router.js - resolve() auto-resolved non-confirmed controllerName: ' + controllerName);
+				console.info('larvitRouter.js - resolve() auto-resolved non-confirmed controllerName: ' + controllerName);
 
 				fs.stat('./controllers/' + controllerName + '.js', function(err, stat) {
 					if ( ! err && stat.isFile()) {
 						request.controllerName = controllerName;
 
-						console.info('router.js - resolve() confirmed auto-resolved controllerName: ' + controllerName);
+						console.info('larvitRouter.js - resolve() confirmed auto-resolved controllerName: ' + controllerName);
 					}
 					callCallback();
 				});
@@ -72,7 +72,7 @@ exports.resolve = function(request, callback) {
 	function callCallback() {
 		if (typeof callback === 'function') {
 			if (request.controllerName === undefined && request.staticFilename === undefined) {
-				var errorMsg = 'router.js - resolve() - Route "' + request.urlParsed.pathname + '" could not be resolved';
+				var errorMsg = 'larvitRouter.js - resolve() - Route "' + request.urlParsed.pathname + '" could not be resolved';
 				console.error(errorMsg);
 				callback(new Error(errorMsg));
 			} else {
@@ -118,7 +118,10 @@ exports.sendToClient = function(err, request, response, data) {
 						if ( ! err) {
 							exports.tmplEngine.render(tmplFileContent.toString(), data, function(err, htmlStr){
 								if ( ! err) {
-									response.writeHead(200, {'Content-Type': 'text/html'});
+									if ( ! response.statusCode)
+										response.statusCode = 200;
+
+									response.writeHead(response.statusCode, {'Content-Type': 'text/html'});
 									response.end(htmlStr);
 								} else {
 									internalError(err);
@@ -142,7 +145,7 @@ exports.sendToClient = function(err, request, response, data) {
 	}
 
 	function internalError(err) {
-		console.error('router.js - sendToClient() exited due to error:');
+		console.error('larvitRouter.js - sendToClient() exited due to error:');
 		console.error(err);
 
 		response.writeHead(500, {'Content-Type': 'text/plain'});
