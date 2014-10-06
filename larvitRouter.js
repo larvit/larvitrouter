@@ -24,8 +24,9 @@ exports.resolve = function(request, callback) {
 
 	// Remove .json path ending
 	if (pathname.substring(pathname.length - 5) == '.json') {
+		console.info('larvitRouter.js - resolve() - removed .json from request "' + pathname + '"');
 		pathname = pathname.substring(0, pathname.length - 5);
-		callCallback();
+		console.info('larvitRouter.js - resolve() - resulting in "' + pathname + '"');
 	}
 
 	// Default route always is default
