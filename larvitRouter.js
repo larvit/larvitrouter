@@ -5,7 +5,7 @@ exports.pubFilePath = './public';
 exports.tmplDir     = 'html';
 
 // Todo: Go over this and make it more loosley coupled
-exports.tmplEngine  = require('larvitTmpl');
+exports.tmplEngine  = require('larvittmpl');
 
 /**
  * Resolve what to do based on request
@@ -23,11 +23,8 @@ exports.resolve = function(request, callback) {
 	var pathname      = request.urlParsed.pathname;
 
 	// Remove .json path ending
-	if (pathname.substring(pathname.length - 5) == '.json') {
-		console.info('larvitRouter.js - resolve() - removed .json from request "' + pathname + '"');
+	if (pathname.substring(pathname.length - 5) == '.json')
 		pathname = pathname.substring(0, pathname.length - 5);
-		console.info('larvitRouter.js - resolve() - resulting in "' + pathname + '"');
-	}
 
 	// Default route always is default
 	if (pathname == '/') {
@@ -55,13 +52,13 @@ exports.resolve = function(request, callback) {
 				// No static file was found, see if we have a matching controller when resolved from URL
 				var controllerName = pathname.substring(1);
 
-				console.info('larvitRouter.js - resolve() auto-resolved non-confirmed controllerName: ' + controllerName);
+				//console.info('larvitRouter.js - resolve() auto-resolved non-confirmed controllerName: ' + controllerName);
 
 				fs.stat('./controllers/' + controllerName + '.js', function(err, stat) {
 					if ( ! err && stat.isFile()) {
 						request.controllerName = controllerName;
 
-						console.info('larvitRouter.js - resolve() confirmed auto-resolved controllerName: ' + controllerName);
+						//console.info('larvitRouter.js - resolve() confirmed auto-resolved controllerName: ' + controllerName);
 					}
 					callCallback();
 				});
