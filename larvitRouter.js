@@ -1,6 +1,6 @@
-	var fs    = require('fs'),
-	    url   = require('url')
-	    merge = require('utils-merge');
+var fs    = require('fs'),
+    url   = require('url'),
+    merge = require('utils-merge');
 
 exports = module.exports = function(options) {
 
@@ -9,8 +9,12 @@ exports = module.exports = function(options) {
 		'pubFilePath':  './public',
 		'tmplDir':      'html',
 		'tmplEngine':   require('larvittmpl'),
-		'customRoutes': []
+		'customRoutes': [],
+		'debug':        false
 	}, options);
+
+	if (options.debug === true)
+		options.tmplEngine.logTime = true;
 
 	var returnObj = {};
 
