@@ -14,7 +14,7 @@ exports = module.exports = function(options) {
 	}, options);
 
 	if (options.debug === true)
-		options.tmplEngine.logTime = true;
+		options.tmplEngine.debug = true;
 
 	var returnObj = {};
 
