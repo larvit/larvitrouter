@@ -8,13 +8,14 @@ exports = module.exports = function(options) {
 	options = merge({
 		'pubFilePath':  './public',
 		'tmplDir':      'html',
-		'tmplEngine':   require('larvittmpl'),
 		'customRoutes': [],
 		'debug':        false
 	}, options);
 
-	if (options.debug === true)
-		options.tmplEngine.debug = true;
+	if (options.tmplEngine === undefined) {
+		//options.tmplEngine = require('larvittmpl')({'debug': options.debug});
+		options.tmplEngine = require('larvittmpl');
+	}
 
 	var returnObj = {};
 
