@@ -7,7 +7,7 @@
 	"private": true,
 	"contributors": [],
 	"dependencies": {
-		"larvittmpl": "x",
+		"underscore": "x",
 		"utils-merge": "x"
 	},
 	"description": "Router for node.js",

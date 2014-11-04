@@ -1,21 +1,21 @@
-var fs    = require('fs'),
-    url   = require('url'),
-    merge = require('utils-merge');
+var fs            = require('fs'),
+    url           = require('url'),
+    merge         = require('utils-merge'),
+    _             = require('underscore'),
+    compiledTmpls = {};
 
 exports = module.exports = function(options) {
 
 	// Copy options object
 	options = merge({
 		'pubFilePath':  './public',
-		'tmplDir':      'html',
+		'tmplDir':      'tmpl',
 		'customRoutes': [],
 		'debug':        false
 	}, options);
 
-	if (options.tmplEngine === undefined) {
-		//options.tmplEngine = require('larvittmpl')({'debug': options.debug});
-		options.tmplEngine = require('larvittmpl');
-	}
+	if ( ! (options.customRoutes instanceof Array))
+		options.customRoutes = [];
 
 	var returnObj = {};
 
@@ -87,32 +87,28 @@ exports = module.exports = function(options) {
 			}
 
 			if (request.type == 'html') {
-				var tmplName = '/' + options.tmplDir + '/' + request.controllerName + '.html',
+				var tmplName = '/' + options.tmplDir + '/' + request.controllerName + '.tmpl',
 				    tmplRequest = {'url': tmplName};
 
 				// Make an internal resolve for the template
 				// We do this to imitade what it would be to fetch the
 				// template from the clients perspective
-				returnObj.resolve(tmplRequest, function(err){
+				returnObj.resolve(tmplRequest, function(err) {
 					if ( ! err && tmplRequest.staticFilename !== undefined) {
 
-						fs.readFile(tmplRequest.staticFilename, function(err, tmplFileContent){
+						compileTmpl(tmplRequest.staticFilename, function(err, compiledTmpl) {
 							if ( ! err) {
-								options.tmplEngine.render(tmplFileContent.toString(), data, function(err, htmlStr){
-									if ( ! err) {
-										if ( ! response.statusCode)
-											response.statusCode = 200;
 
-										response.writeHead(response.statusCode, {'Content-Type': 'text/html'});
-										response.end(htmlStr);
-									} else {
-										internalError(err);
-									}
-								});
+								// The controller might have set a custom status code, do not override it
+								if ( ! response.statusCode)
+									response.statusCode = 200;
+
+								response.writeHead(response.statusCode, {'Content-Type': 'text/html'});
+								response.end(compiledTmpl(data));
 							} else {
 								internalError(err);
 							}
-						})
+						});
 
 					} else {
 						internalError(new Error('template "' + tmplName + '" not found'));
@@ -136,4 +132,23 @@ exports = module.exports = function(options) {
 	};
 
 	return returnObj;
+}
+
+/**
+ * Compile templates and cache the compiled ones
+ */
+function compileTmpl(staticFilename, callback) {
+	if (compiledTmpls[staticFilename] === undefined) {
+		fs.readFile(staticFilename, 'utf8', function(err, tmplFileContent){
+			if ( ! err) {
+				compiledTmpls[staticFilename] = _.template(tmplFileContent);
+
+				callback(null, compiledTmpls[staticFilename]);
+			} else {
+				callback(err);
+			}
+		})
+	} else {
+		callback(null, compiledTmpls[staticFilename]);
+	}
 }
