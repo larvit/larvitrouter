@@ -1,0 +1,27 @@
+{
+	"author": {
+		"name": "Mikael 'Lilleman' Göransson",
+		"email": "lilleman@larvit.se",
+		"url": "http://github.com/hemligabyran/larvitRouter"
+	},
+	"private": true,
+	"contributors": [],
+	"dependencies": {
+		"underscore": "x",
+		"utils-merge": "x"
+	},
+	"description": "Router for node.js",
+	"devDependencies": {},
+	"keywords": [
+		"router",
+		"regexp"
+	],
+	"main": "larvitRouter.js",
+	"name": "larvitRouter",
+	"repository": {
+		"url": "https://github.com/hemligabyran/larvitRouter",
+		"type": "git"
+	},
+	"version": "0.0.1beta",
+	"readmeFilename": "README.md"
+}
