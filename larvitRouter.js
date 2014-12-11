@@ -1,3 +1,5 @@
+'use strict';
+
 var fs            = require('fs'),
     url           = require('url'),
     merge         = require('utils-merge'),
@@ -73,7 +75,9 @@ exports = module.exports = function(options) {
 	};
 
 	returnObj.sendToClient = function sendToClient(err, request, response, data) {
-		if ( ! err) {
+		if ( ! request.urlParsed) {
+			internalError(new Error('request.urlParsed is not set in larvitRouter'));
+		} else if ( ! err) {
 			var splittedPath = request.urlParsed.pathname.split('.');
 
 			// We need to set the request type. Can be either json or html
