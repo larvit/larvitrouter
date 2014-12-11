@@ -3,14 +3,16 @@
 var fs            = require('fs'),
     url           = require('url'),
     merge         = require('utils-merge'),
-    _             = require('underscore'),
+    _             = require('underscore')
+    path          = require('path'),
+    appPath       = path.dirname(require.main.filename),
     compiledTmpls = {};
 
 exports = module.exports = function(options) {
 
 	// Copy options object
 	options = merge({
-		'pubFilePath':  './public',
+		'pubFilePath':  appPath + '/public',
 		'tmplDir':      'tmpl',
 		'customRoutes': [],
 		'debug':        false
