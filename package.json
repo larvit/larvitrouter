@@ -19,7 +19,7 @@
 		"regexp"
 	],
 	"main": "larvitRouter.js",
-	"name": "larvitRouter",
+	"name": "larvitrouter",
 	"repository": {
 		"url": "https://github.com/hemligabyran/larvitRouter",
 		"type": "git"
