@@ -4,11 +4,13 @@
 		"email": "lilleman@larvit.se",
 		"url": "http://github.com/hemligabyran/larvitRouter"
 	},
-	"private": true,
+	"private": false,
 	"contributors": [],
 	"dependencies": {
 		"underscore": "x",
-		"utils-merge": "x"
+		"utils-merge": "x",
+		"path": "x",
+		"winston": "x"
 	},
 	"description": "Router for node.js",
 	"devDependencies": {},
@@ -22,6 +24,6 @@
 		"url": "https://github.com/hemligabyran/larvitRouter",
 		"type": "git"
 	},
-	"version": "0.0.1beta",
+	"version": "0.0.2beta",
 	"readmeFilename": "README.md"
 }
