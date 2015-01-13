@@ -18,12 +18,16 @@ var fs            = require('fs'),
  */
 function compileTmpl(staticFilename, callback) {
 	if (compiledTmpls[staticFilename] === undefined) {
+		log.debug('Comipling previous uncompiled template "' + staticFilename + '"');
+
 		fs.readFile(staticFilename, 'utf8', function(err, tmplFileContent){
 			if ( ! err) {
 				compiledTmpls[staticFilename] = _.template(tmplFileContent);
 
 				callback(null, compiledTmpls[staticFilename]);
 			} else {
+				log.error('Could not compile template "' + staticFilename + '"');
+
 				callback(err);
 			}
 		});
@@ -68,6 +72,7 @@ exports = module.exports = function(options) {
 			if (request.controllerName === undefined && request.staticFilename === undefined) {
 				err = new Error('larvitRouter - resolve(): Route "' + request.urlParsed.pathname + '" could not be resolved');
 				log.warn(err.message);
+
 				callback(err);
 			} else {
 				callback(null);
@@ -77,6 +82,7 @@ exports = module.exports = function(options) {
 		// Remove .json path ending
 		if (pathname.substring(pathname.length - 5) === '.json') {
 			log.debug('.json URL detected, stripping ".json" for further handling');
+
 			pathname = pathname.substring(0, pathname.length - 5);
 		}
 
@@ -135,6 +141,16 @@ exports = module.exports = function(options) {
 			response.end('Internal server error');
 		}
 
+		function sendJsonToClient() {
+			// The controller might have set a custom status code, do not override it
+			if ( ! response.statusCode) {
+				response.statusCode = 200;
+			}
+
+			response.writeHead(response.statusCode, {'Content-Type': 'application/json'});
+			response.end(JSON.stringify(data));
+		}
+
 		if ( ! request.urlParsed) {
 			sendErrorToClient(new Error('larvitRouter: request.urlParsed is not set'));
 		} else if ( ! err) {
@@ -163,12 +179,6 @@ exports = module.exports = function(options) {
 
 						compileTmpl(tmplRequest.staticFilename, function(err, compiledTmpl) {
 							if ( ! err) {
-
-								// The controller might have set a custom status code, do not override it
-								if ( ! response.statusCode) {
-									response.statusCode = 200;
-								}
-
 								response.writeHead(response.statusCode, {'Content-Type': 'text/html'});
 								response.end(compiledTmpl(data));
 							} else {
@@ -177,12 +187,11 @@ exports = module.exports = function(options) {
 						});
 
 					} else {
-						sendErrorToClient(new Error('larvitRouter: template "' + tmplName + '" not found'));
+						sendJsonToClient();
 					}
 				});
 			} else if (request.type === 'json') {
-				response.writeHead(200, {'Content-Type': 'application/json'});
-				response.end(JSON.stringify(data));
+				sendJsonToClient();
 			}
 		} else {
 			sendErrorToClient(err);
