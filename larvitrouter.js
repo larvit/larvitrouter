@@ -1,38 +1,46 @@
 'use strict';
 
-var fs            = require('fs'),
-    url           = require('url'),
-    merge         = require('utils-merge'),
-    _             = require('underscore'),
-    path          = require('path'),
-    appPath       = path.dirname(require.main.filename),
-    routesConf    = require(appPath + '/config/routes.json'),
-    log           = require('winston'),
-    compiledTmpls = {};
+var fs                 = require('fs'),
+    url                = require('url'),
+    merge              = require('utils-merge'),
+    path               = require('path'),
+    appPath            = path.dirname(require.main.filename),
+    routesConf         = require(appPath + '/config/routes.json'),
+    log                = require('winston'),
+    fileExistsCache    = {},
+    fileExistsCacheNum = 0;
 
 /**
- * Compile templates and cache the compiled ones
+ * Check if a file exists, cached
  *
- * @param str staticFilename
- * @param func callback(err, compiledObj)
+ * @param str path
+ * @param func callback(err, res) res is a boolean
  */
-function compileTmpl(staticFilename, callback) {
-	if (compiledTmpls[staticFilename] === undefined) {
-		log.debug('Comipling previous uncompiled template "' + staticFilename + '"');
-
-		fs.readFile(staticFilename, 'utf8', function(err, tmplFileContent){
-			if ( ! err) {
-				compiledTmpls[staticFilename] = _.template(tmplFileContent);
-
-				callback(null, compiledTmpls[staticFilename]);
-			} else {
-				log.error('Could not compile template "' + staticFilename + '"');
-
-				callback(err);
-			}
-		});
+function fileExists(path, callback) {
+	if (fileExistsCache[path] !== undefined) {
+		callback(null, fileExistsCache[path]);
 	} else {
-		callback(null, compiledTmpls[staticFilename]);
+		fs.stat(path, function(err, stat) {
+			if ( ! err && stat.isFile()) {
+				fileExistsCache[path] = true;
+			} else {
+				fileExistsCache[path] = false;
+			}
+
+			fileExistsCacheNum ++;
+
+			// If the file exists cache is to big, flush it!
+			if (fileExistsCacheNum > 100000) {
+				log.warn('larvitrouter: fileExistsCache above 100000 entries, flushing to stop memory leakage');
+
+				fileExistsCacheNum = 0;
+				fileExistsCache = {};
+			}
+
+			fileExists(path, function(err, res) {
+				callback(err, res);
+			});
+		});
 	}
 }
 
@@ -42,7 +50,7 @@ exports = module.exports = function(options) {
 	// Copy options object
 	options = merge({
 		'pubFilePath':  appPath + '/public',
-		'tmplDir':      'tmpl',
+		'viewPath':     appPath + '/public/views',
 		'customRoutes': []
 	}, options);
 
@@ -63,14 +71,14 @@ exports = module.exports = function(options) {
 		request.urlParsed = url.parse(request.url, true);
 		pathname          = request.urlParsed.pathname;
 
-		log.debug('larvitRouter: parsing URL ' + request.urlParsed.pathname);
+		log.debug('larvitrouter: parsing URL ' + request.urlParsed.pathname);
 
 		// Call callback if callable
 		function callCallback() {
 			var err;
 
 			if (request.controllerName === undefined && request.staticFilename === undefined) {
-				err = new Error('larvitRouter - resolve(): Route "' + request.urlParsed.pathname + '" could not be resolved');
+				err = new Error('larvitrouter - resolve(): Route "' + request.urlParsed.pathname + '" could not be resolved');
 				log.warn(err.message);
 
 				callback(err);
@@ -108,7 +116,7 @@ exports = module.exports = function(options) {
 					// File found! Set the staticFilename and call the callback
 					request.staticFilename = thisPubFilePath;
 
-					log.debug('larvitRouter: Resolved static file: ' + request.staticFilename);
+					log.debug('larvitrouter: Resolved static file: ' + request.staticFilename);
 
 					callCallback();
 				} else {
@@ -118,7 +126,7 @@ exports = module.exports = function(options) {
 
 					fs.stat(controllerPath, function(err, stat) {
 						if ( ! err && stat.isFile()) {
-							log.debug('larvitRouter: Autoresolved controller: ' + controllerPath);
+							log.debug('larvitrouter: Autoresolved controller: ' + controllerPath);
 							request.controllerName = tmpControllerName;
 						}
 
@@ -130,13 +138,11 @@ exports = module.exports = function(options) {
 	};
 
 	returnObj.sendToClient = function sendToClient(err, request, response, data) {
-		var splittedPath,
-		    tmplName,
-		    tmplRequest;
+		var controllerPath = options.viewPath + '/' + request.controllerName,
+		    view,
+		    splittedPath;
 
-		function sendErrorToClient(err) {
-			log.error('larvitRouter - sendToClient(): exited due to error', err);
-
+		function sendErrorToClient() {
 			response.writeHead(500, {'Content-Type': 'text/plain'});
 			response.end('Internal server error');
 		}
@@ -151,8 +157,21 @@ exports = module.exports = function(options) {
 			response.end(JSON.stringify(data));
 		}
 
+		function sendHtmlToClient(htmlStr) {
+			// The controller might have set a custom status code, do not override it
+			if ( ! response.statusCode) {
+				response.statusCode = 200;
+			}
+
+			response.writeHead(response.statusCode, {'Content-Type': 'text/html'});
+			response.end(htmlStr);
+		}
+
 		if ( ! request.urlParsed) {
-			sendErrorToClient(new Error('larvitRouter: request.urlParsed is not set'));
+			err = new Error('larvitrouter: request.urlParsed is not set');
+			log.error(err.message);
+
+			sendErrorToClient();
 		} else if ( ! err) {
 			splittedPath = request.urlParsed.pathname.split('.');
 
@@ -168,33 +187,37 @@ exports = module.exports = function(options) {
 			}
 
 			if (request.type === 'html') {
-				tmplName    = '/' + options.tmplDir + '/' + request.controllerName + '.tmpl';
-				tmplRequest = {'url': tmplName};
+				fileExists(controllerPath + '.js', function(err, exists) {
+					if (err) {
+						err.message = 'larvitrouter - fileExists() failed. Controller path: "' + controllerPath + '"';
+						return;
+					}
 
-				// Make an internal resolve for the template
-				// We do this to imitade what it would be to fetch the
-				// template from the clients perspective
-				returnObj.resolve(tmplRequest, function(err) {
-					if ( ! err && tmplRequest.staticFilename !== undefined) {
+					if (exists) {
+						view = require(controllerPath);
 
-						compileTmpl(tmplRequest.staticFilename, function(err, compiledTmpl) {
-							if ( ! err) {
-								response.writeHead(response.statusCode, {'Content-Type': 'text/html'});
-								response.end(compiledTmpl(data));
-							} else {
-								sendErrorToClient(err);
+						view.run(data, function(err, htmlStr) {
+							if (err) {
+								err.message = 'larvitrouter - view.run() failed. Controller name: "' + request.controllerName + '"';
+								log.error(err.message);
+								sendErrorToClient();
+								return;
 							}
-						});
 
+							sendHtmlToClient(htmlStr);
+						});
 					} else {
-						sendJsonToClient();
+						err = new Error('Could not find controller with name: "' + request.controllerName + '"');
+						log.error(err.message);
+						sendErrorToClient();
 					}
 				});
 			} else if (request.type === 'json') {
 				sendJsonToClient();
 			}
 		} else {
-			sendErrorToClient(err);
+			log.error('larvitrouter: sendToClient() - got error from caller: "' + err.message + '"');
+			sendErrorToClient();
 		}
 	};
 
