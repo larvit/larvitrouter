@@ -78,7 +78,7 @@ exports = module.exports = function(options) {
 			var err;
 
 			if (request.controllerName === undefined && request.staticFilename === undefined) {
-				err = new Error('larvitrouter - resolve(): Route "' + request.urlParsed.pathname + '" could not be resolved');
+				err = new Error('larvitrouter: resolve() - Route "' + request.urlParsed.pathname + '" could not be resolved');
 				log.warn(err.message);
 
 				callback(err);
@@ -189,7 +189,7 @@ exports = module.exports = function(options) {
 			if (request.type === 'html') {
 				fileExists(controllerPath + '.js', function(err, exists) {
 					if (err) {
-						err.message = 'larvitrouter - fileExists() failed. Controller path: "' + controllerPath + '"';
+						err.message = 'larvitrouter: fileExists() failed. Controller path: "' + controllerPath + '"';
 						return;
 					}
 
@@ -198,7 +198,7 @@ exports = module.exports = function(options) {
 
 						view.run(data, function(err, htmlStr) {
 							if (err) {
-								err.message = 'larvitrouter - view.run() failed. Controller name: "' + request.controllerName + '"';
+								err.message = 'larvitrouter: view.run() failed. Controller name: "' + request.controllerName + '"';
 								log.error(err.message);
 								sendErrorToClient();
 								return;
@@ -207,7 +207,7 @@ exports = module.exports = function(options) {
 							sendHtmlToClient(htmlStr);
 						});
 					} else {
-						err = new Error('Could not find controller with name: "' + request.controllerName + '"');
+						err = new Error('larvitrouter: Could not find view with name: "' + request.controllerName + '"');
 						log.error(err.message);
 						sendErrorToClient();
 					}
