@@ -138,7 +138,7 @@ exports = module.exports = function(options) {
 	};
 
 	returnObj.sendToClient = function sendToClient(err, request, response, data) {
-		var controllerPath = options.viewPath + '/' + request.controllerName,
+		var viewPath = options.viewPath + '/' + request.controllerName,
 		    view,
 		    splittedPath;
 
@@ -187,18 +187,18 @@ exports = module.exports = function(options) {
 			}
 
 			if (request.type === 'html') {
-				fileExists(controllerPath + '.js', function(err, exists) {
+				fileExists(viewPath + '.js', function(err, exists) {
 					if (err) {
-						err.message = 'larvitrouter: fileExists() failed. Controller path: "' + controllerPath + '"';
+						err.message = 'larvitrouter: fileExists() failed. View path: "' + viewPath + '.js"';
 						return;
 					}
 
 					if (exists) {
-						view = require(controllerPath);
+						view = require(viewPath);
 
 						view.run(data, function(err, htmlStr) {
 							if (err) {
-								err.message = 'larvitrouter: view.run() failed. Controller name: "' + request.controllerName + '"';
+								err.message = 'larvitrouter: view.run() failed. View path: "' + viewPath + '.js"';
 								log.error(err.message);
 								sendErrorToClient();
 								return;
@@ -207,9 +207,7 @@ exports = module.exports = function(options) {
 							sendHtmlToClient(htmlStr);
 						});
 					} else {
-						err = new Error('larvitrouter: Could not find view with name: "' + request.controllerName + '"');
-						log.error(err.message);
-						sendErrorToClient();
+						sendJsonToClient();
 					}
 				});
 			} else if (request.type === 'json') {
