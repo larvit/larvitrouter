@@ -24,7 +24,7 @@
 		"url": "https://github.com/hemligabyran/larvitrouter",
 		"type": "git"
 	},
-	"version": "0.0.5beta",
+	"version": "0.0.6beta",
 	"readmeFilename": "README.md",
 	"readme": "# larvitrouter\n\nVery simple router and client feeder for node.js\n\n## Required files\n\n./config/routes.json\n\nContent as shown:\n\n    [\n    \t{\n    \t\t\"regex\":          \"^/$\",\n    \t\t\"controllerName\": \"default\"\n    \t},\n    \t{\n    \t\t\"regex\":          \"^/default$\",\n    \t\t\"controllerName\": \"default\"\n    \t}\n    ]\n\nThe first will match exactly \"/\" and will set request.controllerName to ./controllers/default.js.\nThe second will match exactly \"/mupp\" and will set request.controllerName to ./controllers/mupp.js\n\n## Usage\n\nDocumentation not finnished...",
 	"bugs": {
