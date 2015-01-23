@@ -89,7 +89,7 @@ exports = module.exports = function(options) {
 
 		// Remove .json path ending
 		if (pathname.substring(pathname.length - 5) === '.json') {
-			log.debug('.json URL detected, stripping ".json" for further handling');
+			log.debug('larvitrouter: .json URL detected, stripping ".json" for further handling');
 
 			pathname = pathname.substring(0, pathname.length - 5);
 		}
