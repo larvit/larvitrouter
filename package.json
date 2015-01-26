@@ -8,7 +8,6 @@
 	"contributors": [],
 	"dependencies": {
 		"utils-merge": "x",
-		"path": "x",
 		"winston": "x",
 		"larvitviews": "x"
 	},
