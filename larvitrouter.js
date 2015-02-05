@@ -153,7 +153,7 @@ exports = module.exports = function(options) {
 				response.statusCode = 200;
 			}
 
-			response.writeHead(response.statusCode, {'Content-Type': 'application/json; charset=utf-8'});
+			response.setHeader('Content-Type', 'application/json; charset=utf-8');
 			response.end(JSON.stringify(data));
 		}
 
@@ -163,7 +163,7 @@ exports = module.exports = function(options) {
 				response.statusCode = 200;
 			}
 
-			response.writeHead(response.statusCode, {'Content-Type': 'text/html; charset=utf-8'});
+			response.setHeader('Content-Type', 'text/html; charset=utf-8');
 			response.end(htmlStr);
 		}
 
