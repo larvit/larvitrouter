@@ -5,7 +5,6 @@ var fs                 = require('fs'),
     merge              = require('utils-merge'),
     path               = require('path'),
     appPath            = path.dirname(require.main.filename),
-    routesConf         = require(appPath + '/config/routes.json'),
     log                = require('winston'),
     fileExistsCache    = {},
     fileExistsCacheNum = 0;
@@ -51,11 +50,11 @@ exports = module.exports = function(options) {
 	options = merge({
 		'pubFilePath':  appPath + '/public',
 		'viewPath':     appPath + '/public/views',
-		'customRoutes': []
+		'customRoutes': [{
+			'regex':          '^/$',
+			'controllerName': 'default'
+		}]
 	}, options);
-
-	// Append the configuration files routes to the given custom ones
-	options.customRoutes = options.customRoutes.concat(routesConf);
 
 	if ( ! (options.customRoutes instanceof Array)) {
 		options.customRoutes = [];
