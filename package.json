@@ -2,7 +2,7 @@
 	"author": {
 		"name": "Mikael 'Lilleman' Göransson",
 		"email": "lilleman@larvit.se",
-		"url": "http://github.com/hemligabyran/larvitrouter"
+		"url": "http://github.com/larvit/larvitrouter"
 	},
 	"private": false,
 	"contributors": [],
@@ -23,12 +23,12 @@
 		"url": "https://github.com/hemligabyran/larvitrouter",
 		"type": "git"
 	},
-	"version": "0.0.11beta",
+	"version": "0.0.12beta",
 	"readmeFilename": "README.md",
-	"readme": "# larvitrouter\n\nVery simple router and client feeder for node.js\n\n## Required files\n\n./config/routes.json\n\nContent as shown:\n\n    [\n    \t{\n    \t\t\"regex\":          \"^/$\",\n    \t\t\"controllerName\": \"default\"\n    \t},\n    \t{\n    \t\t\"regex\":          \"^/default$\",\n    \t\t\"controllerName\": \"default\"\n    \t}\n    ]\n\nThe first will match exactly \"/\" and will set request.controllerName to ./controllers/default.js.\nThe second will match exactly \"/mupp\" and will set request.controllerName to ./controllers/mupp.js\n\n## Usage\n\nDocumentation not finnished...",
+	"readme": "# larvitrouter\n\nVery simple router and client feeder for node.js\n\nThis documentation is not done.",
 	"bugs": {
-		"url": "https://github.com/hemligabyran/larvitrouter/issues"
+		"url": "https://github.com/larvit/larvitrouter/issues"
 	},
-	"homepage": "https://github.com/hemligabyran/larvitrouter",
+	"homepage": "https://github.com/larvit/larvitrouter",
 	"scripts": {}
 }
