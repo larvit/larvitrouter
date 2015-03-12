@@ -48,13 +48,23 @@ exports = module.exports = function(options) {
 
 	// Copy options object
 	options = merge({
-		'pubFilePath':  appPath + '/public',
-		'viewPath':     appPath + '/public/views',
+		'pubFilePath':     appPath + '/public',
+		'viewPath':        appPath + '/public/views',
+		'controllersPath': appPath + '/controllers',
 		'customRoutes': [{
 			'regex':          '^/$',
 			'controllerName': 'default'
 		}]
 	}, options);
+
+	if (options.pubFilePath[0] === '/') { options.pubFilePath = path.resolve(options.pubFilePath); }
+	else                                { options.pubFilePath = path.join(appPath, options.pubFilePath); }
+
+	if (options.viewPath[0] === '/') { options.viewPath = path.resolve(options.viewPath); }
+	else                             { options.viewPath = path.join(appPath, options.viewPath); }
+
+	if (options.controllersPath[0] === '/') { options.controllersPath = path.resolve(options.controllersPath); }
+	else                                    { options.controllersPath = path.join(appPath, options.controllersPath); }
 
 	if ( ! (options.customRoutes instanceof Array)) {
 		options.customRoutes = [];
@@ -121,7 +131,7 @@ exports = module.exports = function(options) {
 				} else {
 					// No static file was found, see if we have a matching controller when resolved from URL
 					tmpControllerName = pathname.substring(1);
-					controllerPath    = './controllers/' + tmpControllerName + '.js';
+					controllerPath    = path.join(options.controllersPath, tmpControllerName + '.js');
 
 					fs.stat(controllerPath, function(err, stat) {
 						if ( ! err && stat.isFile()) {
@@ -164,6 +174,11 @@ exports = module.exports = function(options) {
 
 			response.setHeader('Content-Type', 'text/html; charset=utf-8');
 			response.end(htmlStr);
+		}
+
+		// Custom view file found
+		if (data.viewFile !== undefined) {
+			viewPath = options.viewPath + '/' + data.viewFile;
 		}
 
 		if ( ! request.urlParsed) {
