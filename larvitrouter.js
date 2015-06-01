@@ -157,13 +157,24 @@ exports = module.exports = function(options) {
 		}
 
 		function sendJsonToClient() {
+			var jsonStr;
+
 			// The controller might have set a custom status code, do not override it
 			if ( ! response.statusCode) {
 				response.statusCode = 200;
 			}
 
 			response.setHeader('Content-Type', 'application/json; charset=utf-8');
-			response.end(JSON.stringify(data));
+
+			try {
+				jsonStr = JSON.stringify(data);
+			} catch(err) {
+				response.statusCode = 500;
+				log.error('larvitrouter: returnObj.sendToClient() - sendJsonToClient() - Could not transform data to JSON: "' + err.message + '" JSON.inspect(): "' + require('util').inspect(data, {'depth': null}));
+				jsonStr = '{"error": "' + err.message + '"}';
+			}
+
+			response.end(jsonStr);
 		}
 
 		function sendHtmlToClient(htmlStr) {
