@@ -202,13 +202,19 @@ exports = module.exports = function(options) {
 
 			// We need to set the request type. Can be either json or html
 			if (splittedPath[splittedPath.length - 1] === 'json') {
-				request.type = 'json';
+				request.type           = 'json';
 				request.controllerName = request.controllerName.substring(0, request.controllerName.length - 5);
 				if (request.controllerName === '') {
 					request.controllerName = 'default';
 				}
 			} else {
 				request.type = 'html';
+			}
+
+			// For redirect statuses, do not send a body at all
+			if (response.statusCode.toString().substring(0, 1) === '3') {
+				response.end();
+				return;
 			}
 
 			if (request.type === 'html') {
