@@ -187,6 +187,10 @@ exports = module.exports = function(options) {
 			response.end(htmlStr);
 		}
 
+		if (data === undefined) {
+			data = {};
+		}
+
 		// Custom view file found
 		if (data.viewFile !== undefined) {
 			viewPath = options.viewPath + '/' + data.viewFile;
