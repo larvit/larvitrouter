@@ -76,7 +76,8 @@ exports = module.exports = function(options) {
 		    thisPubFilePath,
 		    tmpControllerName,
 		    controllerPath,
-		    protocol;
+		    protocol,
+		    host;
 
 		if (request.connection && request.connection.encrypted) {
 			protocol = 'https';
@@ -84,7 +85,13 @@ exports = module.exports = function(options) {
 			protocol = 'http';
 		}
 
-		request.urlParsed = url.parse(protocol + '://' + request.headers.host + request.url, true);
+		if (request.headers && request.headers.host) {
+			host = request.headers.host;
+		} else {
+			host = 'localhost';
+		}
+
+		request.urlParsed = url.parse(protocol + '://' + host + request.url, true);
 		pathname          = request.urlParsed.pathname;
 
 		log.debug('larvitrouter: parsing URL ' + request.urlParsed.pathname);
