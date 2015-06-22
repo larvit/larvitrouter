@@ -78,7 +78,7 @@ exports = module.exports = function(options) {
 		    controllerPath,
 		    protocol;
 
-		if (request.connection.encrypted) {
+		if (request.connection && request.connection.encrypted) {
 			protocol = 'https';
 		} else {
 			protocol = 'http';
