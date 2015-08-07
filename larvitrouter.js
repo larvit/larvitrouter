@@ -4,7 +4,6 @@ var fs                 = require('fs'),
     url                = require('url'),
     merge              = require('utils-merge'),
     path               = require('path'),
-    appPath            = path.dirname(require.main.filename),
     log                = require('winston'),
     fileExistsCache    = {},
     fileExistsCacheNum = 0;
@@ -46,22 +45,26 @@ function fileExists(path, callback) {
 exports = module.exports = function(options) {
 	var returnObj = {};
 
+	if (options.appPath === undefined) {
+		options.appPath = path.dirname(require.main.filename);
+	}
+
 	// Copy options object
 	options = merge({
-		'pubFilePath':     appPath + '/public',
-		'viewPath':        appPath + '/public/views',
-		'controllersPath': appPath + '/controllers',
+		'pubFilePath':     options.appPath + '/public',
+		'viewPath':        options.appPath + '/public/views',
+		'controllersPath': options.appPath + '/controllers',
 		'customRoutes':    []
 	}, options);
 
 	if (options.pubFilePath[0] === '/') { options.pubFilePath = path.resolve(options.pubFilePath); }
-	else                                { options.pubFilePath = path.join(appPath, options.pubFilePath); }
+	else                                { options.pubFilePath = path.join(options.appPath, options.pubFilePath); }
 
 	if (options.viewPath[0] === '/') { options.viewPath = path.resolve(options.viewPath); }
-	else                             { options.viewPath = path.join(appPath, options.viewPath); }
+	else                             { options.viewPath = path.join(options.appPath, options.viewPath); }
 
 	if (options.controllersPath[0] === '/') { options.controllersPath = path.resolve(options.controllersPath); }
-	else                                    { options.controllersPath = path.join(appPath, options.controllersPath); }
+	else                                    { options.controllersPath = path.join(options.appPath, options.controllersPath); }
 
 	if ( ! (options.customRoutes instanceof Array)) {
 		options.customRoutes = [];
