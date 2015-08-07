@@ -7,9 +7,9 @@
 	"private": false,
 	"contributors": [],
 	"dependencies": {
-		"utils-merge": "x",
-		"winston": "x",
-		"larvitviews": "x"
+		"utils-merge": "latest",
+		"winston": "latest",
+		"larvitviews": "latest"
 	},
 	"description": "Router for node.js",
 	"devDependencies": {},
@@ -23,7 +23,7 @@
 		"url": "https://github.com/hemligabyran/larvitrouter",
 		"type": "git"
 	},
-	"version": "0.0.19",
+	"version": "0.0.20",
 	"readmeFilename": "README.md",
 	"readme": "# larvitrouter\n\nVery simple router and client feeder for node.js\n\nThis documentation is not done.",
 	"bugs": {

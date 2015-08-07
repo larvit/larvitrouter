@@ -51,10 +51,7 @@ exports = module.exports = function(options) {
 		'pubFilePath':     appPath + '/public',
 		'viewPath':        appPath + '/public/views',
 		'controllersPath': appPath + '/controllers',
-		'customRoutes': [{
-			'regex':          '^/$',
-			'controllerName': 'default'
-		}]
+		'customRoutes':    []
 	}, options);
 
 	if (options.pubFilePath[0] === '/') { options.pubFilePath = path.resolve(options.pubFilePath); }
@@ -69,6 +66,11 @@ exports = module.exports = function(options) {
 	if ( ! (options.customRoutes instanceof Array)) {
 		options.customRoutes = [];
 	}
+
+	options.customRoutes.push({
+		'regex':          '^/$',
+		'controllerName': 'default'
+	});
 
 	returnObj.resolve = function resolve(request, callback) {
 		var pathname,
