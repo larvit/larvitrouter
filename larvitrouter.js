@@ -45,6 +45,10 @@ function fileExists(path, callback) {
 exports = module.exports = function(options) {
 	var returnObj = {};
 
+	if (options === undefined) {
+		options = {};
+	}
+
 	if (options.appPath === undefined) {
 		options.appPath = path.dirname(require.main.filename);
 	}
