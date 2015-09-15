@@ -67,17 +67,20 @@ function fileExists(pathToResolve, cb) {
 		tasks.push(function(cb) {
 			var testPath = path.join(paths[i], pathToResolve);
 
-			// If this
+			log.debug('larvitrouter: fileExists() - pushTask() - Checking for ' + testPath);
+
+			// If this exists, callback directly
 			if (fileExistsCache[pathToResolve] !== undefined) {
+				log.debug('larvitrouter: fileExists() - pushTask() - Found ' + testPath + ' in cache');
 				cb();
 				return;
 			}
 
+			// Lookup if this file exists
 			fs.stat(testPath, function(err, stat) {
 				if ( ! err && stat.isFile()) {
+					log.debug('larvitrouter: fileExists() - pushTask() - Found ' + testPath + ' - loading to cache');
 					fileExistsCache[pathToResolve] = testPath;
-				} else {
-					fileExistsCache[pathToResolve] = false;
 				}
 
 				cb();
@@ -139,6 +142,11 @@ function fileExists(pathToResolve, cb) {
 
 					fileExistsCacheNum = 0;
 					fileExistsCache    = {};
+				}
+
+				// Set this path to false if it was not found
+				if (fileExistsCache[pathToResolve] === undefined) {
+					fileExistsCache[pathToResolve] = false;
 				}
 
 				// Re-run this function to return the cached result or cache it again
