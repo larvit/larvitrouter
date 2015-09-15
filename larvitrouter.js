@@ -13,6 +13,12 @@ var fs                 = require('fs'),
 
 // Load paths into local cache to be used for resolving static files and stuff
 function loadPaths(cb) {
+	if (paths.length) {
+		log.debug('larvitrouter: loadPaths() - Paths cache already loaded, calling callback');
+		cb();
+		return;
+	}
+
 	log.verbose('larvitrouter: loadPaths() - Loading paths cache');
 	npm.load({}, function(err) {
 		if (err) {
