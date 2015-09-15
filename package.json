@@ -15,7 +15,8 @@
 	"devDependencies": {},
 	"keywords": [
 		"router",
-		"regexp"
+		"regexp",
+		"async"
 	],
 	"main": "larvitrouter.js",
 	"name": "larvitrouter",

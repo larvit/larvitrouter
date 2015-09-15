@@ -8,10 +8,12 @@ Router and client feeder for node.js
 
 All options passed here are optional and the given ones are the default that will be used if they are omitted.
 
+Paths are relative to application root as first priority. If nothing is found there, all modules will be tested as relative to this path to try to find a matching file. The modules are searched in the order given in package.json dependencies.
+
     var router = require('larvitrouter')({
-    	'pubFilePath':     path.dirname(require.main.filename) + '/public',
-    	'viewPath':        path.dirname(require.main.filename) + '/public/views',
-    	'controllersPath': path.dirname(require.main.filename) + '/controllers',
+    	'pubFilePath':     'public',
+    	'viewPath':        'public/views',
+    	'controllersPath': 'controllers',
     	'customRoutes': [{
     		'regex':          '^/$',
     		'controllerName': 'default'
