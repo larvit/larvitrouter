@@ -229,7 +229,16 @@ exports = module.exports = function(options) {
 				err = new Error('larvitrouter: resolve() - Route "' + request.urlParsed.pathname + '" could not be resolved');
 				log.warn(err.message);
 
-				callback(err);
+				fileExists(options.controllersPath + '/404.js', function(err, res, truePath) {
+					if (err) {
+						throw err;
+					}
+
+					request.controllerName     = '404';
+					request.controllerFullPath = truePath;
+
+					callback(err);
+				});
 			} else {
 				callback(null);
 			}
@@ -242,11 +251,26 @@ exports = module.exports = function(options) {
 			pathname = pathname.substring(0, pathname.length - 5);
 		}
 
+		// Go through all custom routes to see if we have a match
 		while (options.customRoutes[i] !== undefined) {
 			if (RegExp(options.customRoutes[i].regex).test(pathname)) {
 				log.debug('larvitrouter: returnObj.resolve() - Matched custom route "' + options.customRoutes[i].regex + '" to controllerName: ' + options.customRoutes[i].controllerName);
-				request.controllerName = options.customRoutes[i].controllerName;
-				callCallback();
+
+				fileExists(options.controllersPath + '/' + options.customRoutes[i].controllerName + '.js', function(err, res, truePath) {
+					if (err) {
+						throw err;
+					}
+
+					if ( ! res) {
+						request.controllerName = undefined;
+						callCallback();
+						return;
+					}
+
+					request.controllerName     = options.customRoutes[i].controllerName;
+					request.controllerFullPath = truePath;
+					callCallback();
+				});
 				return; // Break execution, no need to go through the rest
 			}
 
