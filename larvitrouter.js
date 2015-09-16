@@ -306,7 +306,8 @@ exports = module.exports = function(options) {
 
 					if (res) {
 						log.debug('larvitrouter: Autoresolved controller: ' + truePath);
-						request.controllerName = pathname.substring(1);;
+						request.controllerName     = pathname.substring(1);;
+						request.controllerFullPath = truePath;
 					}
 
 					callCallback();
