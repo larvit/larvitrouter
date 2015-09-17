@@ -68,17 +68,12 @@ exports = module.exports = function(options) {
 	// Copy options object
 	options = merge({
 		'pubFilePath':     'public',
-		'viewPath':        'public/views',
 		'controllersPath': 'controllers',
 		'customRoutes':    []
 	}, options);
 
 	if (options.pubFilePath[0] === '/') {
 		options.pubFilePath = path.resolve(options.pubFilePath);
-	}
-
-	if (options.viewPath[0] === '/') {
-		options.viewPath = path.resolve(options.viewPath);
 	}
 
 	if (options.controllersPath[0] === '/') {
@@ -314,114 +309,6 @@ exports = module.exports = function(options) {
 				});
 			}
 		});
-	};
-
-	returnObj.sendToClient = function sendToClient(err, request, response, data) {
-		var viewPath = options.viewPath + '/' + request.controllerName,
-		    view,
-		    splittedPath;
-
-		function sendErrorToClient() {
-			response.writeHead(500, {'Content-Type': 'text/plain'});
-			response.end('Internal server error');
-		}
-
-		function sendJsonToClient() {
-			var jsonStr;
-
-			// The controller might have set a custom status code, do not override it
-			if ( ! response.statusCode) {
-				response.statusCode = 200;
-			}
-
-			response.setHeader('Content-Type', 'application/json; charset=utf-8');
-
-			try {
-				jsonStr = JSON.stringify(data);
-			} catch(err) {
-				response.statusCode = 500;
-				log.error('larvitrouter: returnObj.sendToClient() - sendJsonToClient() - Could not transform data to JSON: "' + err.message + '" JSON.inspect(): "' + require('util').inspect(data, {'depth': null}));
-				jsonStr = '{"error": "' + err.message + '"}';
-			}
-
-			response.end(jsonStr);
-		}
-
-		function sendHtmlToClient(htmlStr) {
-			// The controller might have set a custom status code, do not override it
-			if ( ! response.statusCode) {
-				response.statusCode = 200;
-			}
-
-			response.setHeader('Content-Type', 'text/html; charset=utf-8');
-			response.end(htmlStr);
-		}
-
-		if (data === undefined) {
-			data = {};
-		}
-
-		// Custom view file found
-		if (data.viewFile !== undefined) {
-			viewPath = options.viewPath + '/' + data.viewFile;
-		}
-
-		if ( ! request.urlParsed) {
-			err = new Error('larvitrouter: request.urlParsed is not set');
-			log.error(err.message);
-
-			sendErrorToClient();
-		} else if ( ! err) {
-			splittedPath = request.urlParsed.pathname.split('.');
-
-			// We need to set the request type. Can be either json or html
-			if (splittedPath[splittedPath.length - 1] === 'json') {
-				request.type           = 'json';
-				request.controllerName = request.controllerName.substring(0, request.controllerName.length - 5);
-				if (request.controllerName === '') {
-					request.controllerName = 'default';
-				}
-			} else {
-				request.type = 'html';
-			}
-
-			// For redirect statuses, do not send a body at all
-			if (response.statusCode.toString().substring(0, 1) === '3') {
-				response.end();
-				return;
-			}
-
-			if (request.type === 'html') {
-				returnObj.fileExists(viewPath + '.js', function(err, exists, fullPath) {
-					if (err) {
-						err.message = 'larvitrouter: fileExists() failed. View full path: "' + fullPath + '"';
-						return;
-					}
-
-					if (exists) {
-						view = require(fullPath);
-
-						view.run(data, function(err, htmlStr) {
-							if (err) {
-								err.message = 'larvitrouter: view.run() failed. View full path: "' + fullPath + '"';
-								log.error(err.message);
-								sendErrorToClient();
-								return;
-							}
-
-							sendHtmlToClient(htmlStr);
-						});
-					} else {
-						sendJsonToClient();
-					}
-				});
-			} else if (request.type === 'json') {
-				sendJsonToClient();
-			}
-		} else {
-			log.error('larvitrouter: sendToClient() - got error from caller: "' + err.message + '"');
-			sendErrorToClient();
-		}
 	};
 
 	return returnObj;
