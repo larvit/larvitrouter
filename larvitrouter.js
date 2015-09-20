@@ -224,7 +224,7 @@ exports = module.exports = function(options) {
 				err = new Error('larvitrouter: resolve() - Route "' + request.urlParsed.pathname + '" could not be resolved');
 				log.warn(err.message);
 
-				fileExists(options.controllersPath + '/404.js', function(err, res, truePath) {
+				returnObj.fileExists(options.controllersPath + '/404.js', function(err, res, truePath) {
 					if (err) {
 						throw err;
 					}
