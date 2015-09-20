@@ -248,6 +248,7 @@ exports = module.exports = function(options) {
 
 		// Go through all custom routes to see if we have a match
 		while (options.customRoutes[i] !== undefined) {
+			log.silly('larvitrouter: returnObj.resolve() - Trying to match custom route "' + options.customRoutes[i].regex + '" with pathname "' + pathname + '"');
 			if (RegExp(options.customRoutes[i].regex).test(pathname)) {
 				log.debug('larvitrouter: returnObj.resolve() - Matched custom route "' + options.customRoutes[i].regex + '" to controllerName: ' + options.customRoutes[i].controllerName);
 
