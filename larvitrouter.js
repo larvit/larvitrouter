@@ -1,13 +1,12 @@
 'use strict';
 
-var fs                 = require('fs'),
-    url                = require('url'),
-    merge              = require('utils-merge'),
-    path               = require('path'),
-    log                = require('winston'),
-    npm                = require('npm'),
-    async              = require('async'),
-    paths              = [];
+var fs    = require('fs'),
+    url   = require('url'),
+    merge = require('utils-merge'),
+    path  = require('path'),
+    log   = require('winston'),
+    npm   = require('npm'),
+    paths = [];
 
 // Load paths into local cache to be used for resolving static files and stuff
 function loadPaths(cb) {
@@ -52,10 +51,15 @@ function loadPaths(cb) {
 	});
 }
 
+// Load paths directly!
+loadPaths(function() {});
+
 exports = module.exports = function(options) {
-	var returnObj          = {},
+	var returnObj          = {'paths': paths},
 	    fileExistsCache    = {},
-	    fileExistsCacheNum = 0;
+	    fileExistsCacheNum = 0,
+	    defaultRouteFound  = false,
+	    i;
 
 	if (options === undefined) {
 		options = {};
@@ -84,110 +88,102 @@ exports = module.exports = function(options) {
 		options.customRoutes = [];
 	}
 
-	options.customRoutes.push({
-		'regex':          '^/$',
-		'controllerName': 'default'
-	});
+	i = 0;
+	while (options.customRoutes[i] !== undefined) {
+		if (options.customRoutes[i].regex === '^/$') {
+			defaultRouteFound = true;
+			break;
+		}
+
+		i ++;
+	}
+
+	if (defaultRouteFound === false) {
+		options.customRoutes.push({
+			'regex':          '^/$',
+			'controllerName': 'default'
+		});
+	}
 
 	/**
 	 * Check if a file exists, cached
 	 *
 	 * @param str pathToResolve - relative path to reesolve to absolute path
-	 * @param func cb(err, res, fullPath) res is a boolean
+	 * @return str fullPath - or false if not found
 	 */
-	returnObj.fileExists = function fileExists(pathToResolve, cb) {
-		var tasks = [];
+	returnObj.fileExists = function fileExists(pathToResolve) {
+		var testPath,
+		    stat,
+		    i;
 
-		function pushTask(i) {
-			tasks.push(function(cb) {
-				var testPath = path.join(paths[i], pathToResolve);
-
-				log.debug('larvitrouter: fileExists() - pushTask() - Checking for ' + testPath);
-
-				// If this exists, callback directly
-				if (fileExistsCache[pathToResolve] !== undefined) {
-					log.debug('larvitrouter: fileExists() - pushTask() - Found ' + testPath + ' in cache');
-					cb();
-					return;
-				}
-
-				// Lookup if this file exists
-				fs.stat(testPath, function(err, stat) {
-					if ( ! err && stat.isFile()) {
-						log.debug('larvitrouter: fileExists() - pushTask() - Found ' + testPath + ' - loading to cache');
-						fileExistsCache[pathToResolve] = testPath;
-					}
-
-					cb();
-				});
-			});
+		if ( ! paths.length) {
+			log.warn('larvitrouter: fileExists() - Called before paths are loaded. Wait until they are and call again!');
+			return false;
 		}
 
-		if (fileExistsCache[pathToResolve] === false) {
-			cb(null, false);
-		} else if (fileExistsCache[pathToResolve] !== undefined) {
-			cb(null, true, fileExistsCache[pathToResolve]);
+		if (fileExistsCache[pathToResolve] !== undefined) {
+			return fileExistsCache[pathToResolve];
 		} else {
-			log.verbose('larvitrouter: fileExists() - Populating cache');
-			loadPaths(function(err) {
-				var i;
+			// If the file exists cache is to big, flush it!
+			if (fileExistsCacheNum > 100000) {
+				log.warn('larvitrouter: fileExists() - fileExistsCache above 100000 entries, flushing to stop memory leakage');
 
-				if (err) {
-					log.error('larvitrouter: fileExists() - loadPaths() failed with: ' + err.message);
-					throw err;
+				fileExistsCacheNum = 0;
+				fileExistsCache    = {};
+			} else {
+				fileExistsCacheNum ++;
+			}
+
+			if (pathToResolve[0] === '/') {
+				log.debug('larvitrouter: fileExists() - pathToResolve starts with "/", only check aboslute path');
+				if (fileExistsCache[pathToResolve] !== undefined) {
+					return fileExistsCache[pathToResolve];
 				}
 
-				if (pathToResolve[0] === '/') {
-					log.debug('larvitrouter: fileExists() - pathToResolve starts with "/", only check aboslute path');
-					tasks.push(function(cb) {
-						// If this
-						if (fileExistsCache[pathToResolve] !== undefined) {
-							cb();
-							return;
-						}
+				stat = fs.statSync(pathToResolve);
 
-						fs.stat(pathToResolve, function(err, stat) {
-							if ( ! err && stat.isFile()) {
-								fileExistsCache[pathToResolve] = pathToResolve;
-							} else {
-								fileExistsCache[pathToResolve] = false;
-							}
-
-							cb();
-						});
-					});
+				if (stat.isFile()) {
+					fileExistsCache[pathToResolve] = pathToResolve;
 				} else {
-					log.debug('larvitrouter: fileExists() - pathToResolve is relative, look in all the paths');
-					i = 0;
-					while (paths[i] !== undefined) {
-						pushTask(i);
-
-						i ++;
-					}
+					fileExistsCache[pathToResolve] = false;
 				}
 
-				async.series(tasks, function() {
-					fileExistsCacheNum ++;
+				return fileExistsCache[pathToResolve];
+			} else {
+				log.debug('larvitrouter: fileExists() - pathToResolve is relative, look in all the paths');
+				i = 0;
+				while (paths[i] !== undefined) {
+					log.debug('larvitrouter: fileExists() - Checking for ' + testPath);
 
-					log.debug('larvitrouter: fileExists() - All async tasks is done');
-
-					// If the file exists cache is to big, flush it!
-					if (fileExistsCacheNum > 100000) {
-						log.warn('larvitrouter: fileExists() - fileExistsCache above 100000 entries, flushing to stop memory leakage');
-
-						fileExistsCacheNum = 0;
-						fileExistsCache    = {};
+					// If this exists, return directly
+					if (fileExistsCache[pathToResolve] !== undefined) {
+						log.debug('larvitrouter: fileExists() - Found ' + testPath + ' in cache');
+						return fileExistsCache[pathToResolve];
 					}
 
-					// Set this path to false if it was not found
-					if (fileExistsCache[pathToResolve] === undefined) {
-						fileExistsCache[pathToResolve] = false;
+					testPath = path.join(paths[i], pathToResolve);
+
+					// Lookup if this file exists
+					try {
+						stat = fs.statSync(testPath);
+
+						if (stat.isFile()) {
+							log.debug('larvitrouter: fileExists() - Found ' + testPath + ' - loading to cache');
+							fileExistsCache[pathToResolve] = testPath;
+							return fileExistsCache[pathToResolve];
+						}
+					} catch(e) {
+						log.debug('larvitrouter: fileExists() - ' + testPath + ' does not exist');
 					}
 
-					// Re-run this function to return the cached result or cache it again
-					fileExists(pathToResolve, cb);
-				});
-			});
+					i ++;
+				}
+
+				// If we arrive here, no file have been found.
+				fileExistsCache[pathToResolve] = false;
+
+				return fileExistsCache[pathToResolve];
+			}
 		}
 	};
 
@@ -195,6 +191,7 @@ exports = module.exports = function(options) {
 		var i = 0,
 		    thisPubFilePath,
 		    controllerPath,
+		    truePath,
 		    pathname,
 		    protocol,
 		    host;
@@ -224,16 +221,10 @@ exports = module.exports = function(options) {
 				err = new Error('larvitrouter: resolve() - Route "' + request.urlParsed.pathname + '" could not be resolved');
 				log.warn(err.message);
 
-				returnObj.fileExists(options.controllersPath + '/404.js', function(err, res, truePath) {
-					if (err) {
-						throw err;
-					}
+				request.controllerName     = '404';
+				request.controllerFullPath = returnObj.fileExists(options.controllersPath + '/404.js');
 
-					request.controllerName     = '404';
-					request.controllerFullPath = truePath;
-
-					callback(err);
-				});
+				callback(err);
 			} else {
 				callback(null);
 			}
@@ -252,21 +243,16 @@ exports = module.exports = function(options) {
 			if (RegExp(options.customRoutes[i].regex).test(pathname)) {
 				log.debug('larvitrouter: returnObj.resolve() - Matched custom route "' + options.customRoutes[i].regex + '" to controllerName: ' + options.customRoutes[i].controllerName);
 
-				returnObj.fileExists(options.controllersPath + '/' + options.customRoutes[i].controllerName + '.js', function(err, res, truePath) {
-					if (err) {
-						throw err;
-					}
+				request.controllerFullPath = returnObj.fileExists(options.controllersPath + '/' + options.customRoutes[i].controllerName + '.js');
 
-					if ( ! res) {
-						request.controllerName = undefined;
-						callCallback();
-						return;
-					}
+				if (request.controllerFullPath === false) {
+					request.controllerName = undefined;
+				} else {
+					request.controllerName = options.customRoutes[i].controllerName;
+				}
 
-					request.controllerName     = options.customRoutes[i].controllerName;
-					request.controllerFullPath = truePath;
-					callCallback();
-				});
+				callCallback();
+
 				return; // Break execution, no need to go through the rest
 			}
 
@@ -279,37 +265,28 @@ exports = module.exports = function(options) {
 
 		// Try to match a static file and if that fails, try to match a controller from URL
 		thisPubFilePath = path.join(options.pubFilePath, pathname);
-		returnObj.fileExists(thisPubFilePath, function(err, res, truePath) {
-			if (err) {
-				throw err;
+		truePath        = returnObj.fileExists(thisPubFilePath);
+
+		if (truePath !== false) {
+			// File found! Set the staticFilename and call the callback
+			request.staticFilename = truePath;
+
+			log.debug('larvitrouter: returnObj.resolve() - Resolved static file: ' + request.staticFilename);
+
+			callCallback();
+		} else {
+			// No static file was found, see if we have a matching controller when resolved from URL
+			controllerPath = path.join(options.controllersPath, pathname + '.js');
+			truePath       = returnObj.fileExists(controllerPath);
+
+			if (truePath !== false) {
+				log.debug('larvitrouter: Autoresolved controller: ' + truePath);
+				request.controllerName     = pathname.substring(1);;
+				request.controllerFullPath = truePath;
 			}
 
-			if (res) {
-				// File found! Set the staticFilename and call the callback
-				request.staticFilename = truePath;
-
-				log.debug('larvitrouter: returnObj.resolve() - Resolved static file: ' + request.staticFilename);
-
-				callCallback();
-			} else {
-				// No static file was found, see if we have a matching controller when resolved from URL
-				controllerPath = path.join(options.controllersPath, pathname + '.js');
-
-				returnObj.fileExists(controllerPath, function(err, res, truePath) {
-					if (err) {
-						throw err;
-					}
-
-					if (res) {
-						log.debug('larvitrouter: Autoresolved controller: ' + truePath);
-						request.controllerName     = pathname.substring(1);;
-						request.controllerFullPath = truePath;
-					}
-
-					callCallback();
-				});
-			}
-		});
+			callCallback();
+		}
 	};
 
 	return returnObj;
