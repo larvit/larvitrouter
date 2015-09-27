@@ -31,7 +31,7 @@
 		"url": "https://github.com/hemligabyran/larvitrouter",
 		"type": "git"
 	},
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"readmeFilename": "README.md",
 	"readme": "# larvitrouter\n\nVery simple router and client feeder for node.js\n\nThis documentation is not done.",
 	"bugs": {

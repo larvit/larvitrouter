@@ -66,6 +66,7 @@ exports = module.exports = function(options) {
 	// Load paths into local cache to be used for resolving static files and stuff
 	if ( ! paths.length) {
 		log.verbose('larvitrouter: loadPaths() - Loading paths cache');
+		paths.push('dummy'); // We add this so this code is not ran again to soon. The dummy should be removed further down.
 
 		npm.load({}, function(err) {
 			if (err) {
@@ -94,6 +95,9 @@ exports = module.exports = function(options) {
 						paths.push(res.dependencies[module].path);
 					}
 				}
+
+				// Remove dummy path
+				paths.shift();
 
 				// Emit an event to flag for external programs that fileExists() is safe to run
 				returnObj.emit('pathsLoaded');
