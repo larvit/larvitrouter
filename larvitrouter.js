@@ -1,65 +1,23 @@
 'use strict';
 
-var fs    = require('fs'),
-    url   = require('url'),
-    merge = require('utils-merge'),
-    path  = require('path'),
-    log   = require('winston'),
-    npm   = require('npm'),
-    paths = [];
-
-// Load paths into local cache to be used for resolving static files and stuff
-function loadPaths(cb) {
-	if (paths.length) {
-		log.debug('larvitrouter: loadPaths() - Paths cache already loaded, calling callback');
-		cb();
-		return;
-	}
-
-	log.verbose('larvitrouter: loadPaths() - Loading paths cache');
-	npm.load({}, function(err) {
-		if (err) {
-			log.error('larvitrouter: loadPaths() - npm.load() returned error: ' + err.message);
-			cb(err);
-			return;
-		}
-
-		npm.commands.ls(undefined, true, function(err, res) {
-			var module;
-
-			if (err) {
-				log.error('larvitrouter: loadPaths() - npm.commands.ls() returned error: ' + err.message);
-
-				cb(err);
-				return;
-			}
-
-			// Always start with the application path
-			log.verbose('larvitrouter: loadPaths() - Application path: ' + res.path);
-			paths.push(res.path);
-
-			// Then load the module paths
-			for (module in res.dependencies) {
-				if (res.dependencies[module].path !== undefined) {
-					log.verbose('larvitrouter: loadPaths() - Module path: ' + res.dependencies[module].path);
-					paths.push(res.dependencies[module].path);
-				}
-			}
-
-			cb();
-		});
-	});
-}
-
-// Load paths directly!
-loadPaths(function() {});
+var fs     = require('fs'),
+    url    = require('url'),
+    events = require('events'),
+    merge  = require('utils-merge'),
+    path   = require('path'),
+    log    = require('winston'),
+    npm    = require('npm'),
+    paths  = [];
 
 exports = module.exports = function(options) {
-	var returnObj          = {'paths': paths},
+	var returnObj          = new events.EventEmitter(),
 	    fileExistsCache    = {},
 	    fileExistsCacheNum = 0,
 	    defaultRouteFound  = false,
 	    i;
+
+	// Link to the module global paths object so this will be loaded once and then just returned
+	returnObj.paths = paths;
 
 	if (options === undefined) {
 		options = {};
@@ -105,19 +63,57 @@ exports = module.exports = function(options) {
 		});
 	}
 
+	// Load paths into local cache to be used for resolving static files and stuff
+	if ( ! paths.length) {
+		log.verbose('larvitrouter: loadPaths() - Loading paths cache');
+
+		npm.load({}, function(err) {
+			if (err) {
+				log.error('larvitrouter: loadPaths() - npm.load() returned error: ' + err.message);
+				throw err;
+				return;
+			}
+
+			npm.commands.ls(undefined, true, function(err, res) {
+				var module;
+
+				if (err) {
+					log.error('larvitrouter: loadPaths() - npm.commands.ls() returned error: ' + err.message);
+					throw err;
+					return;
+				}
+
+				// Always start with the application path
+				log.verbose('larvitrouter: loadPaths() - Application path: ' + res.path);
+				paths.push(res.path);
+
+				// Then load the module paths
+				for (module in res.dependencies) {
+					if (res.dependencies[module].path !== undefined) {
+						log.verbose('larvitrouter: loadPaths() - Module path: ' + res.dependencies[module].path);
+						paths.push(res.dependencies[module].path);
+					}
+				}
+
+				// Emit an event to flag for external programs that fileExists() is safe to run
+				returnObj.emit('pathsLoaded');
+			});
+		});
+	}
+
 	/**
 	 * Check if a file exists, cached
 	 *
 	 * @param str pathToResolve - relative path to reesolve to absolute path
 	 * @return str fullPath - or false if not found
 	 */
-	returnObj.fileExists = function fileExists(pathToResolve) {
+	returnObj.fileExists = function(pathToResolve) {
 		var testPath,
 		    stat,
 		    i;
 
 		if ( ! paths.length) {
-			log.warn('larvitrouter: fileExists() - Called before paths are loaded. Wait until they are and call again!');
+			log.warn('larvitrouter: fileExists() - Called before paths are loaded. Never run this method before event "pathsLoaded" is emitted!');
 			return false;
 		}
 

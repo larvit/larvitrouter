@@ -20,7 +20,28 @@ Paths are relative to application root as first priority. If nothing is found th
     	}]
     });
 
-### Resolve a path:
+### Hierarchy file system; fileExists()
+
+The idea here is to be able to share files between modules and application in a transparant way.
+
+Lets say you'd wish to serve a HTML file, index.html. The default file resides in our little module "foobar" like this:
+
+    ./node_modules/foobar/public/index.html
+
+If we run fileExists('public/index.html'); we'll get the full path back:
+
+    var fullPath = require('larvitrouter')().fileExists('public/index.html');
+    // /app/absolute/path/node_modules/foobar/public/index.html
+
+But if we add this file to our own application, in ./public/index.html, that file will be higher in priority and will be returned instead:
+
+    var fullPath = require('larvitrouter')().fileExists('public/index.html');
+    // /app/absolute/path/public/index.html
+
+All modules in node_modules will be searched for the given file. The priority is decided by the list order in dependencies in package.json.
+
+
+### Resolve a path
 
     router.resolve(request, function(err) {
     	if (err) {
@@ -32,7 +53,6 @@ Paths are relative to application root as first priority. If nothing is found th
     	// If a static file is found, it is populated in request.staticFilename
 
     	// else request.controllerName will be populated with the name set in the custom routes or found controller in the controller path
-
     });
 
 ### Sending data to the client

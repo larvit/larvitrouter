@@ -12,7 +12,14 @@
 		"larvitviews": "latest"
 	},
 	"description": "Router for node.js",
-	"devDependencies": {},
+	"devDependencies": {
+		"mocha": "latest",
+		"pre-git": "latest"
+	},
+	"pre-commit": [
+		"npm test",
+		"eslint ./"
+	],
 	"keywords": [
 		"router",
 		"regexp",
@@ -24,12 +31,19 @@
 		"url": "https://github.com/hemligabyran/larvitrouter",
 		"type": "git"
 	},
-	"version": "0.0.30",
+	"version": "0.1.0",
 	"readmeFilename": "README.md",
 	"readme": "# larvitrouter\n\nVery simple router and client feeder for node.js\n\nThis documentation is not done.",
 	"bugs": {
 		"url": "https://github.com/larvit/larvitrouter/issues"
 	},
 	"homepage": "https://github.com/larvit/larvitrouter",
-	"scripts": {}
+	"scripts": {
+		"test": "mocha"
+	},
+	"license": "MIT",
+	"maintainers": [{
+		"name": "lilleman",
+		"email": "lilleman@larvit.se"
+	}]
 }
