@@ -219,7 +219,7 @@ exports = module.exports = function(options) {
 
 			if (request.controllerName === undefined && request.staticFilename === undefined) {
 				err = new Error('larvitrouter: resolve() - Route "' + request.urlParsed.pathname + '" could not be resolved');
-				log.warn(err.message);
+				log.info(err.message);
 
 				request.controllerName     = '404';
 				request.controllerFullPath = returnObj.fileExists(options.controllersPath + '/404.js');
