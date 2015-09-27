@@ -85,13 +85,13 @@ exports = module.exports = function(options) {
 				}
 
 				// Always start with the application path
-				log.verbose('larvitrouter: loadPaths() - Application path: ' + res.path);
+				log.debug('larvitrouter: loadPaths() - Application path: ' + res.path);
 				paths.push(res.path);
 
 				// Then load the module paths
 				for (module in res.dependencies) {
 					if (res.dependencies[module].path !== undefined) {
-						log.verbose('larvitrouter: loadPaths() - Module path: ' + res.dependencies[module].path);
+						log.debug('larvitrouter: loadPaths() - Module path: ' + res.dependencies[module].path);
 						paths.push(res.dependencies[module].path);
 					}
 				}
@@ -135,7 +135,7 @@ exports = module.exports = function(options) {
 			}
 
 			if (pathToResolve[0] === '/') {
-				log.debug('larvitrouter: fileExists() - pathToResolve starts with "/", only check aboslute path');
+				log.silly('larvitrouter: fileExists() - pathToResolve, "' + pathToResolve + '", starts with "/", only check aboslute path');
 				if (fileExistsCache[pathToResolve] !== undefined) {
 					return fileExistsCache[pathToResolve];
 				}
@@ -150,14 +150,14 @@ exports = module.exports = function(options) {
 
 				return fileExistsCache[pathToResolve];
 			} else {
-				log.debug('larvitrouter: fileExists() - pathToResolve is relative, look in all the paths');
+				log.silly('larvitrouter: fileExists() - pathToResolve, "' + pathToResolve + '", is relative, look in all the paths');
 				i = 0;
 				while (paths[i] !== undefined) {
-					log.debug('larvitrouter: fileExists() - Checking for ' + testPath);
+					log.silly('larvitrouter: fileExists() - Checking for ' + testPath);
 
 					// If this exists, return directly
 					if (fileExistsCache[pathToResolve] !== undefined) {
-						log.debug('larvitrouter: fileExists() - Found ' + testPath + ' in cache');
+						log.silly('larvitrouter: fileExists() - Found ' + testPath + ' in cache');
 						return fileExistsCache[pathToResolve];
 					}
 
@@ -173,7 +173,7 @@ exports = module.exports = function(options) {
 							return fileExistsCache[pathToResolve];
 						}
 					} catch(e) {
-						log.debug('larvitrouter: fileExists() - ' + testPath + ' does not exist');
+						log.silly('larvitrouter: fileExists() - ' + testPath + ' does not exist');
 					}
 
 					i ++;
