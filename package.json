@@ -28,11 +28,10 @@
 	"main": "larvitrouter.js",
 	"name": "larvitrouter",
 	"repository": {
-		"url": "https://github.com/hemligabyran/larvitrouter",
+		"url": "https://github.com/larvit/larvitrouter",
 		"type": "git"
 	},
-	"version": "0.1.4",
-	"readmeFilename": "README.md",
+	"version": "0.1.5",
 	"bugs": {
 		"url": "https://github.com/larvit/larvitrouter/issues"
 	},
