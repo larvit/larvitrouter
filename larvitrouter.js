@@ -14,6 +14,7 @@ exports = module.exports = function(options) {
 	    fileExistsCache    = {},
 	    fileExistsCacheNum = 0,
 	    defaultRouteFound  = false,
+	    pathsLoading       = false,
 	    i;
 
 	// Link to the module global paths object so this will be loaded once and then just returned
@@ -64,9 +65,9 @@ exports = module.exports = function(options) {
 	}
 
 	// Load paths into local cache to be used for resolving static files and stuff
-	if ( ! paths.length) {
+	if ( ! paths.length && ! pathsLoading) {
 		log.verbose('larvitrouter: loadPaths() - Loading paths cache');
-		paths.push('dummy'); // We add this so this code is not ran again to soon. The dummy should be removed further down.
+		pathsLoading = true;
 
 		npm.load({}, function(err) {
 			if (err) {
@@ -96,9 +97,7 @@ exports = module.exports = function(options) {
 					}
 				}
 
-				// Remove dummy path
-				paths.shift();
-
+				pathsLoading = false;
 				// Emit an event to flag for external programs that fileExists() is safe to run
 				returnObj.emit('pathsLoaded');
 			});
@@ -221,8 +220,14 @@ exports = module.exports = function(options) {
 				err = new Error('larvitrouter: resolve() - Route "' + request.urlParsed.pathname + '" could not be resolved');
 				log.info(err.message);
 
-				request.controllerName     = '404';
-				request.controllerFullPath = returnObj.fileExists(options.controllersPath + '/404.js');
+				request.controllerName = '404';
+				if (returnObj.paths.length) {
+					request.controllerFullPath = returnObj.fileExists(options.controllersPath + '/404.js');
+				} else {
+					returnObj.on('pathsLoaded', function() {
+						request.controllerFullPath = returnObj.fileExists(options.controllersPath + '/404.js');
+					});
+				}
 
 				callback(err);
 			} else {
@@ -237,21 +242,32 @@ exports = module.exports = function(options) {
 			pathname = pathname.substring(0, pathname.length - 5);
 		}
 
+		// We do this because of possible async calls to fileExists()
+		function setControllerName() {
+			request.controllerFullPath = returnObj.fileExists(options.controllersPath + '/' + options.customRoutes[i].controllerName + '.js');
+
+			if (request.controllerFullPath === false) {
+				request.controllerName = undefined;
+			} else {
+				request.controllerName = options.customRoutes[i].controllerName;
+			}
+
+			callCallback();
+		}
+
 		// Go through all custom routes to see if we have a match
 		while (options.customRoutes[i] !== undefined) {
 			log.silly('larvitrouter: returnObj.resolve() - Trying to match custom route "' + options.customRoutes[i].regex + '" with pathname "' + pathname + '"');
 			if (RegExp(options.customRoutes[i].regex).test(pathname)) {
 				log.debug('larvitrouter: returnObj.resolve() - Matched custom route "' + options.customRoutes[i].regex + '" to controllerName: ' + options.customRoutes[i].controllerName);
 
-				request.controllerFullPath = returnObj.fileExists(options.controllersPath + '/' + options.customRoutes[i].controllerName + '.js');
-
-				if (request.controllerFullPath === false) {
-					request.controllerName = undefined;
+				if (returnObj.paths.length) {
+					setControllerName();
 				} else {
-					request.controllerName = options.customRoutes[i].controllerName;
+					returnObj.on('pathsLoaded', function() {
+						setControllerName();
+					});
 				}
-
-				callCallback();
 
 				return; // Break execution, no need to go through the rest
 			}
