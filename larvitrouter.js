@@ -1,20 +1,20 @@
 'use strict';
 
-var fs     = require('fs'),
-    url    = require('url'),
-    events = require('events'),
-    merge  = require('utils-merge'),
-    path   = require('path'),
-    log    = require('winston'),
-    npm    = require('npm'),
-    paths  = [];
+var fs           = require('fs'),
+    url          = require('url'),
+    events       = require('events'),
+    merge        = require('utils-merge'),
+    path         = require('path'),
+    log          = require('winston'),
+    npm          = require('npm'),
+    paths        = [],
+    pathsLoading = false;
 
 exports = module.exports = function(options) {
 	var returnObj          = new events.EventEmitter(),
 	    fileExistsCache    = {},
 	    fileExistsCacheNum = 0,
 	    defaultRouteFound  = false,
-	    pathsLoading       = false,
 	    i;
 
 	// Link to the module global paths object so this will be loaded once and then just returned
