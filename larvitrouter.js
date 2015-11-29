@@ -1,14 +1,13 @@
 'use strict';
 
-var fs           = require('fs'),
-    url          = require('url'),
-    events       = require('events'),
-    merge        = require('utils-merge'),
-    path         = require('path'),
-    log          = require('winston'),
-    npm          = require('npm'),
-    paths        = [],
-    pathsLoading = false;
+var events = require('events'),
+    merge  = require('utils-merge'),
+    path   = require('path'),
+    paths  = [],
+    url    = require('url'),
+    log    = require('winston'),
+    npm    = require('npm'),
+    fs     = require('fs');
 
 exports = module.exports = function(options) {
 	var returnObj          = new events.EventEmitter(),
@@ -65,9 +64,9 @@ exports = module.exports = function(options) {
 	}
 
 	// Load paths into local cache to be used for resolving static files and stuff
-	if ( ! paths.length && ! pathsLoading) {
+	if ( ! paths.length && ! exports.pathsLoading) {
 		log.verbose('larvitrouter: loadPaths() - Loading paths cache');
-		pathsLoading = true;
+		exports.pathsLoading = true;
 
 		npm.load({}, function(err) {
 			if (err) {
@@ -97,7 +96,7 @@ exports = module.exports = function(options) {
 					}
 				}
 
-				pathsLoading = false;
+				exports.pathsLoading = false;
 				// Emit an event to flag for external programs that fileExists() is safe to run
 				returnObj.emit('pathsLoaded');
 			});
@@ -139,11 +138,16 @@ exports = module.exports = function(options) {
 					return fileExistsCache[pathToResolve];
 				}
 
-				stat = fs.statSync(pathToResolve);
+				try {
+					stat = fs.statSync(pathToResolve);
 
-				if (stat.isFile()) {
-					fileExistsCache[pathToResolve] = pathToResolve;
-				} else {
+					if (stat.isFile()) {
+						fileExistsCache[pathToResolve] = pathToResolve;
+					} else {
+						fileExistsCache[pathToResolve] = false;
+					}
+				} catch(err) {
+					log.verbose('larvitrouter: fileExists() - fs.statSync() threw err: ' + err.message);
 					fileExistsCache[pathToResolve] = false;
 				}
 
