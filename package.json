@@ -7,15 +7,15 @@
 	"private": false,
 	"contributors": [],
 	"dependencies": {
-		"larvitviews": "~0.1",
-		"npm": "~3.5",
-		"utils-merge": "~1.0",
-		"winston": "~2.1"
+		"larvitviews": "^0.2",
+		"npm": "^3",
+		"utils-merge": "^1",
+		"winston": "^2"
 	},
 	"description": "Router for node.js",
 	"devDependencies": {
-		"mocha": "latest",
-		"pre-git": "latest"
+		"mocha": "^2",
+		"pre-git": "^3"
 	},
 	"pre-commit": [
 		"npm test",
@@ -32,7 +32,7 @@
 		"url": "https://github.com/larvit/larvitrouter",
 		"type": "git"
 	},
-	"version": "0.1.11",
+	"version": "0.1.12",
 	"bugs": {
 		"url": "https://github.com/larvit/larvitrouter/issues"
 	},
