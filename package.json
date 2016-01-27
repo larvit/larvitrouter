@@ -7,7 +7,7 @@
   "private": false,
   "contributors": [],
   "dependencies": {
-    "larvitviews": "^0.2.0",
+    "larvitviews": "^0.2.1",
     "npm": "^3.6.0",
     "utils-merge": "^1.0.0",
     "winston": "^2.1.1"
@@ -32,7 +32,7 @@
     "url": "https://github.com/larvit/larvitrouter",
     "type": "git"
   },
-  "version": "0.1.13",
+  "version": "0.1.14",
   "bugs": {
     "url": "https://github.com/larvit/larvitrouter/issues"
   },
