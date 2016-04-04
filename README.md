@@ -1,66 +1,65 @@
+[![Build Status](https://travis-ci.org/larvit/larvitrouter.svg?branch=master)](https://travis-ci.org/larvit/larvitrouter) [![Dependencies](https://david-dm.org/larvit/larvitrouter.svg)](https://david-dm.org/larvit/larvitrouter.svg)
+
 # larvitrouter
 
-Router and client feeder for node.js
+Route an URL to a controller or a static file, where controller is a filename in the "controllers" path and a static file is a filename in the "public" path.
 
-## Usage
+Auto resolves files like so:
 
-### Load module
+* /foo translates to controllers/foo.js
+* /css/style.css translates to public/css/style.css
+* / translates to controllers/default.js
+
+This behaviour can be changed with customized options.
+
+## Load module
 
 All options passed here are optional and the given ones are the default that will be used if they are omitted.
 
 Paths are relative to application root as first priority. If nothing is found there, all modules will be tested as relative to this path to try to find a matching file. The modules are searched in the order given in package.json dependencies.
 
-    var router = require('larvitrouter')({
-    	'pubFilePath':     'public',
-    	'viewPath':        'public/views',
-    	'controllersPath': 'controllers',
-    	'customRoutes': [{
-    		'regex':          '^/$',
-    		'controllerName': 'default'
-    	}]
-    });
+Simple, use default options:
 
-### Hierarchy file system; fileExists()
+```javascript
+const router = require('larvitrouter')();
+```
 
-The idea here is to be able to share files between modules and application in a transparant way.
+Use custom options (the defaults are used in this example):
 
-Lets say you'd wish to serve a HTML file, index.html. The default file resides in our little module "foobar" like this:
+```javascript
+const router = require('larvitrouter')({
+	'controllersPath': 'controllers',
+	'publicPath': 'public',
+	'routes': [{
+		'regex':          '^/$',
+		'controllerName': 'default'
+	}]
+});
+```
 
-    ./node_modules/foobar/public/index.html
+## Resolve a path
 
-If we run fileExists('public/index.html'); we'll get the full path back:
+```javascript
+const router = require('larvitrouter')(),
+      http   = require('http');
 
-    var fullPath = require('larvitrouter')().fileExists('public/index.html');
-    // /app/absolute/path/node_modules/foobar/public/index.html
+http.createServer(function(req, res) {
+	router.resolve(req, function(err, result) {
+		if (err)
+			throw err;
 
-But if we add this file to our own application, in ./public/index.html, that file will be higher in priority and will be returned instead:
+		// If a static file is found, it is populated in result.staticFilename
+		if (result.staticFilename !== undefined) {
+			console.log('staticFilename: ' + result.staticFilename);
+			console.log('static file path: ' + result.staticFullPath);
 
-    var fullPath = require('larvitrouter')().fileExists('public/index.html');
-    // /app/absolute/path/public/index.html
+		// else result.controllerName will be populated with the name set in the routes or found controller in the controller path
+		} else {
+			console.log('controllerName: ' + result.conrollerName);
+			console.log('controller path: ' + result.controllerFullPath);
+		}
 
-All modules in node_modules will be searched for the given file. The priority is decided by the list order in dependencies in package.json.
-
-
-### Resolve a path
-
-    router.resolve(request, function(err) {
-    	if (err) {
-    		throw err;
-    	}
-
-    	// Here request.urlParsed will be populated from url.parse(request.url, true)
-
-    	// If a static file is found, it is populated in request.staticFilename
-
-    	// else request.controllerName will be populated with the name set in the custom routes or found controller in the controller path
-    });
-
-### Sending data to the client
-
-Why not use response.send() and response.end() directly you ask? Because we want to use views and templates and if they are missing we want to automaticly respond with the JSON data instead. That is why.
-
-If you have a very simple controller that always do the same simple thing, go ahead and use response.send() and response.end() instead. :)
-
-The view filename is by default the same as the controller name. To use a custom view file, set response.viewFile to a custom filename. It will be relative to the viewPath option.
-
-    router.sendToClient(err, request, response, data);
+		res.end('Resolved stuff, se console output for details');
+	})
+}).listen(8001);
+```

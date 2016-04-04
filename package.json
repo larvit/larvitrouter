@@ -7,15 +7,16 @@
   "private": false,
   "contributors": [],
   "dependencies": {
-    "larvitviews": "^0.3.0",
-    "npm": "^3.6.0",
+    "larvitfs": "^1.0.0",
     "utils-merge": "^1.0.0",
-    "winston": "^2.1.1"
+    "winston": "^2.2.0"
   },
   "description": "Router for node.js",
   "devDependencies": {
-    "mocha": "^2.4.2",
-    "pre-git": "^3.3.0"
+    "eslint": "^2.6.0",
+    "mocha": "^2.4.5",
+    "pre-git": "^3.8.1",
+    "test_module": "file:test_module"
   },
   "pre-commit": [
     "npm test",
@@ -26,20 +27,19 @@
     "regexp",
     "async"
   ],
-  "main": "larvitrouter.js",
+  "main": "index.js",
   "name": "larvitrouter",
   "repository": {
     "url": "https://github.com/larvit/larvitrouter",
     "type": "git"
   },
-  "version": "0.1.15",
+  "version": "1.0.0",
   "bugs": {
     "url": "https://github.com/larvit/larvitrouter/issues"
   },
   "homepage": "https://github.com/larvit/larvitrouter",
   "scripts": {
-    "test": "mocha",
-    "commit": "commit-wizard"
+    "test": "mocha"
   },
   "license": "MIT",
   "maintainers": [
