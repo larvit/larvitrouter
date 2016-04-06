@@ -1,7 +1,10 @@
 'use strict';
 
 const assert = require('assert'),
-      path   = require('path');
+      path   = require('path'),
+      log    = require('winston');
+
+log.remove(log.transports.Console);
 
 describe('Default settings', function() {
 	const router = require('../index.js')();
@@ -56,4 +59,14 @@ describe('Default settings', function() {
 		done();
 	});
 
+	it('Fail gracefully when not given a path to resolve', function(done) {
+		const result = router.resolve({});
+
+		assert.deepEqual(result.controllerName, '500');
+		assert.deepEqual(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/500.js'));
+		assert.deepEqual(result.staticFilename, undefined);
+		assert.deepEqual(result.staticFullPath, undefined);
+
+		done();
+	});
 });

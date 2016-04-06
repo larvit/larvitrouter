@@ -59,6 +59,11 @@ exports = module.exports = function(options) {
 		let controllerPath,
 		    pubFilePath;
 
+		if (typeof urlStr !== 'string') {
+			log.warn('larvitrouter: returnObj.resolve() - Invalid option given, is not a string');
+			urlStr = '/500';
+		}
+
 		log.debug('larvitrouter: returnObj.resolve() - parsing URL ' + urlStr);
 
 		// Remove .json path ending
