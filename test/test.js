@@ -70,3 +70,22 @@ describe('Default settings', function() {
 		done();
 	});
 });
+
+describe('Custom routes', function() {
+	const router = require('../index.js')({
+		'customRoutes': [{
+			'regex': '^/flump.css$',
+			'controllerName': 'default'
+		}]
+	});
+
+	it('Resolve custom route in favor of static files', function(done) {
+		const result = router.resolve('/flump.css');
+
+		assert.deepEqual(result.controllerName, 'default');
+		assert.deepEqual(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/default.js'));
+		assert.deepEqual(result.staticFilename, undefined);
+		assert.deepEqual(result.staticFullPath, undefined);
+		done();
+	});
+});
