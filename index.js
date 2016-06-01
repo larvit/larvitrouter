@@ -54,7 +54,8 @@ exports = module.exports = function(options) {
 	}
 
 	returnObj.resolve = function resolve(urlStr) {
-		const result = {};
+		const orgUrlStr = urlStr,
+		      result    = {};
 
 		let controllerPath,
 		    pubFilePath;
@@ -98,12 +99,16 @@ exports = module.exports = function(options) {
 			// autoresolved controller
 
 			// Try to match a static file and if that fails, try to match a controller from URL
-			pubFilePath     = path.join(options.pubFilePath, urlStr);
-			pubFileFullPath = lfs.getPathSync(pubFilePath);
+			if (typeof orgUrlStr === 'string') {
+				pubFilePath     = path.join(options.pubFilePath, orgUrlStr);
+				pubFileFullPath = lfs.getPathSync(pubFilePath);
+			} else {
+				pubFileFullPath = false;
+			}
 
 			if (pubFileFullPath !== false) {
 				// File found! Set the staticFilename and call the cb
-				result.staticFilename = urlStr;
+				result.staticFilename = orgUrlStr;
 				result.staticFullPath = pubFileFullPath;
 
 				log.debug('larvitrouter: returnObj.resolve() - Resolved static file: ' + result.staticFilename);
