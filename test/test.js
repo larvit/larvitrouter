@@ -69,6 +69,17 @@ describe('Default settings', function() {
 
 		done();
 	});
+
+	it('Resolve static .json file before controller json view', function(done) {
+		const result = router.resolve('/thefile.json');
+
+		assert.deepEqual(result.controllerName, undefined);
+		assert.deepEqual(result.controllerFullPath, undefined);
+		assert.deepEqual(result.staticFilename, '/thefile.json');
+		assert.deepEqual(result.staticFullPath, path.join(__dirname, '../node_modules/test_module/public/thefile.json'));
+
+		done();
+	});
 });
 
 describe('Custom routes', function() {
