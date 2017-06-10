@@ -13,15 +13,10 @@
   },
   "description": "Router for node.js",
   "devDependencies": {
-    "eslint": "^2.6.0",
-    "mocha": "^2.4.5",
-    "pre-git": "^3.8.1",
+    "eslint": "^3.19.0",
+    "mocha": "^3.4.2",
     "test_module": "file:test_module"
   },
-  "pre-commit": [
-    "npm test",
-    "eslint ./"
-  ],
   "keywords": [
     "router",
     "regexp",
@@ -33,7 +28,7 @@
     "url": "https://github.com/larvit/larvitrouter",
     "type": "git"
   },
-  "version": "1.0.3",
+  "version": "1.0.4",
   "bugs": {
     "url": "https://github.com/larvit/larvitrouter/issues"
   },
@@ -47,14 +42,5 @@
       "name": "lilleman",
       "email": "lilleman@larvit.se"
     }
-  ],
-  "config": {
-    "pre-git": {
-      "commit-msg": [],
-      "pre-commit": [],
-      "pre-push": [],
-      "post-commit": [],
-      "post-merge": []
-    }
-  }
+  ]
 }
