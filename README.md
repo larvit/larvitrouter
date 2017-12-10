@@ -1,18 +1,25 @@
 [![Build Status](https://travis-ci.org/larvit/larvitrouter.svg?branch=master)](https://travis-ci.org/larvit/larvitrouter) [![Dependencies](https://david-dm.org/larvit/larvitrouter.svg)](https://david-dm.org/larvit/larvitrouter.svg)
+[![Coverage Status](https://coveralls.io/repos/larvit/larvitrouter/badge.svg)](https://coveralls.io/github/larvit/larvitrouter)
 
-# larvitrouter
+# URL router
 
 Route an URL to a controller or a static file, where controller is a filename in the "controllers" path and a static file is a filename in the "public" path.
 
 Auto resolves files like so:
 
-* /foo translates to controllers/foo.js
-* /css/style.css translates to public/css/style.css
-* / translates to controllers/default.js
+* /foo might resolve to controllerPath: foo.js and templatePath: foo.ejs
+* /css/style.css might resolve to staticPath: css/style.css
+* / resolves to controllerPath: default.js and templatePath: default.tmpl
 
 This behaviour can be changed with customized options.
 
-## Load module
+## Installation
+
+```bash
+npm i larvitrouter
+```
+
+## Usage
 
 All options passed here are optional and the given ones are the default that will be used if they are omitted.
 
@@ -21,18 +28,23 @@ Paths are relative to application root as first priority. If nothing is found th
 Simple, use default options:
 
 ```javascript
-const router = require('larvitrouter')();
+const Router = require('larvitrouter'),
+      router = new Router();
 ```
 
-Use custom options (the defaults are used in this example):
+Use custom options (the defaults are used in this example), all paths are relative to process.cwd():
 
 ```javascript
-const router = require('larvitrouter')({
+const Router = require('larvitrouter'),
+      router = new Router({
 	'controllersPath': 'controllers',
-	'publicPath': 'public',
+	'staticsPath':     'public',
+	'templatesPath':   'public/templates',
+	'templateExts':    ['tmpl', 'tmp', 'ejs', 'pug']
 	'routes': [{
 		'regex':          '^/$',
-		'controllerName': 'default'
+		'controllerPath': 'default.js',
+		'templatePath':   'default.tmpl'
 	}]
 });
 ```
@@ -40,23 +52,30 @@ const router = require('larvitrouter')({
 ## Resolve a path
 
 ```javascript
-const router = require('larvitrouter')(),
+const Router = require('larvitrouter'),
+      router = new Router(),
       http   = require('http');
 
 http.createServer(function(req, res) {
 	router.resolve(req, function(err, result) {
-		if (err)
-			throw err;
+		if (err) throw err;
 
-		// If a static file is found, it is populated in result.staticFilename
+		// A static file was found
 		if (result.staticFilename !== undefined) {
-			console.log('staticFilename: ' + result.staticFilename);
-			console.log('static file path: ' + result.staticFullPath);
+			console.log('static path: ' + result.staticPath);
+			console.log('static full path: ' + result.staticFullPath);
+		}
 
-		// else result.controllerName will be populated with the name set in the routes or found controller in the controller path
-		} else {
-			console.log('controllerName: ' + result.conrollerName);
-			console.log('controller path: ' + result.controllerFullPath);
+		// A controller was found
+		if (result.controllerPath)
+			console.log('controller path: ' + result.controllerPath);
+			console.log('controller full path: ' + result.controllerFullPath);
+		}
+
+		// A template was found
+		if (result.templatePath) {
+			console.log('template path: ' + result.templatePath);
+			console.log('template full path: ' + result.templateFullPath);
 		}
 
 		res.end('Resolved stuff, se console output for details');

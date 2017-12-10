@@ -1,102 +1,113 @@
 'use strict';
 
-const assert = require('assert'),
-      path   = require('path'),
-      log    = require('winston');
+const	Router	= require(__dirname + '/../index.js'),
+	path	= require('path'),
+	test	= require('tape');
 
-log.remove(log.transports.Console);
+test('Resolve the default controller', function (t) {
+	const	router	= new Router();
 
-describe('Default settings', function() {
-	const router = require('../index.js')();
+	router.resolve('/', function (err, result) {
+		t.error(err);
 
-	it('Resolve the default controller', function(done) {
-		const result = router.resolve('/');
-
-		assert.deepEqual(result.controllerName, 'default');
-		assert.deepEqual(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/default.js'));
-		assert.deepEqual(result.staticFilename, undefined);
-		assert.deepEqual(result.staticFullPath, undefined);
-		done();
-	});
-
-	it('Resolve fail string to 404', function(done) {
-		const result = router.resolve('/fasdf.txt');
-
-		assert.deepEqual(result.controllerName, '404');
-		assert.deepEqual(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/404.js'));
-		assert.deepEqual(result.staticFilename, undefined);
-		assert.deepEqual(result.staticFullPath, undefined);
-		done();
-	});
-
-	it('Resolve static file', function(done) {
-		const result = router.resolve('/test.css');
-
-		assert.deepEqual(result.controllerName, undefined);
-		assert.deepEqual(result.controllerFullPath, undefined);
-		assert.deepEqual(result.staticFilename, '/test.css');
-		assert.deepEqual(result.staticFullPath, path.join(__dirname, '../node_modules/test_module/public/test.css'));
-		done();
-	});
-
-	it('Auto resolve custom controller foo', function(done) {
-		const result = router.resolve('/foo');
-
-		assert.deepEqual(result.controllerName, 'foo');
-		assert.deepEqual(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/foo.js'));
-		assert.deepEqual(result.staticFilename, undefined);
-		assert.deepEqual(result.staticFullPath, undefined);
-		done();
-	});
-
-	it('Auto resolve custom controller bleh/blah', function(done) {
-		const result = router.resolve('/bleh/blah');
-
-		assert.deepEqual(result.controllerName, 'bleh/blah');
-		assert.deepEqual(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/bleh/blah.js'));
-		assert.deepEqual(result.staticFilename, undefined);
-		assert.deepEqual(result.staticFullPath, undefined);
-		done();
-	});
-
-	it('Fail gracefully when not given a path to resolve', function(done) {
-		const result = router.resolve({});
-
-		assert.deepEqual(result.controllerName, '500');
-		assert.deepEqual(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/500.js'));
-		assert.deepEqual(result.staticFilename, undefined);
-		assert.deepEqual(result.staticFullPath, undefined);
-
-		done();
-	});
-
-	it('Resolve static .json file before controller json view', function(done) {
-		const result = router.resolve('/thefile.json');
-
-		assert.deepEqual(result.controllerName, undefined);
-		assert.deepEqual(result.controllerFullPath, undefined);
-		assert.deepEqual(result.staticFilename, '/thefile.json');
-		assert.deepEqual(result.staticFullPath, path.join(__dirname, '../node_modules/test_module/public/thefile.json'));
-
-		done();
+		t.equal(result.controllerPath,	'default.js');
+		t.equal(result.controllerFullPath,	path.join(__dirname, '../node_modules/test_module/controllers/default.js'));
+		t.equal(result.templatePath,	'default.tmpl');
+		t.equal(result.templateFullPath,	path.join(__dirname, '../node_modules/test_module/public/templates/default.tmpl'));
+		t.equal(result.staticPath,	undefined);
+		t.equal(result.staticFullPath,	undefined);
+		t.end();
 	});
 });
 
-describe('Custom routes', function() {
-	const router = require('../index.js')({
-		'customRoutes': [{
+test('Resolve nothing for URL with no matches', function (t) {
+	const	router	= new Router();
+
+	router.resolve('/fasdf.txt', function (err, result) {
+		t.error(err);
+
+		t.equal(result.controllerPath,	undefined);
+		t.equal(result.controllerFullPath,	undefined);
+		t.equal(result.templatePath,	undefined);
+		t.equal(result.templateFullPath,	undefined);
+		t.equal(result.staticPath,	undefined);
+		t.equal(result.staticFullPath,	undefined);
+		t.end();
+	});
+});
+
+test('Resolve static file', function (t) {
+	const	router	= new Router();
+
+	router.resolve('/fasdf.txt', function (err, result) {
+		t.error(err);
+
+		t.equal(result.controllerPath,	undefined);
+		t.equal(result.controllerFullPath,	undefined);
+		t.equal(result.templatePath,	undefined);
+		t.equal(result.templateFullPath,	undefined);
+		t.equal(result.staticPath,	'test.css');
+		t.equal(result.staticFullPath,	path.join(__dirname, '../node_modules/test_module/public/test.css'));
+		t.end();
+	});
+});
+
+test('Auto resolve custom controller foo', function(t) {
+	const	router	= new Router();
+
+	router.resolve('/foo', function (err, result) {
+		t.error(err);
+
+		t.equal(result.controllerPath,	'foo.js');
+		t.equal(result.controllerFullPath,	path.join(__dirname, '../node_modules/test_module/controllers/foo.js'));
+		t.equal(result.templatePath,	undefined);
+		t.equal(result.templateFullPath,	undefined);
+		t.equal(result.staticPath,	undefined);
+		t.equal(result.staticFullPath,	undefined);
+		t.end();
+	});
+});
+
+test('Auto resolve custom controller bleh/blah', function(t) {
+	const	router	= new Router();
+
+	router.resolve('/bleh/blah', function (err, result) {
+		t.error(err);
+
+		t.equal(result.controllerPath,	'bleh/blah.js');
+		t.equal(result.controllerFullPath,	path.join(__dirname, '../node_modules/test_module/controllers/bleh/blah.js'));
+		t.equal(result.templatePath,	undefined);
+		t.equal(result.templateFullPath,	undefined);
+		t.equal(result.staticPath,	undefined);
+		t.equal(result.staticFullPath,	undefined);
+		t.end();
+	});
+});
+
+test('Fail gracefully when not given a path to resolve', function(t) {
+	const	router	= new Router();
+
+	router.resolve({}, function (err) {
+		t.equal(err instanceof Error, true);
+		t.end();
+	});
+});
+
+test('Custom routes', function(t) {
+	const	router	= new Router({
+		'routes': [{
 			'regex': '^/flump.css$',
-			'controllerName': 'default'
+			'controllerPath': 'default.js'
 		}]
 	});
 
-	it('Resolve custom route in favor of static files', function(done) {
-		const result = router.resolve('/flump.css');
-
-		assert.deepEqual(result.controllerName, 'default');
-		assert.deepEqual(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/default.js'));
-		assert.deepEqual(result.staticFilename, undefined);
-		assert.deepEqual(result.staticFullPath, undefined);
-		done();
+	router.resolve('/flump.css', function (err, result) {
+		t.equal(result.controllerPath,	'default.js');
+		t.equal(result.controllerFullPath,	path.join(__dirname, '../node_modules/test_module/controllers/default.js'));
+		t.equal(result.templatePath,	undefined);
+		t.equal(result.templateFullPath,	undefined);
+		t.equal(result.staticPath,	undefined);
+		t.equal(result.staticFullPath,	undefined);
+		t.end();
 	});
 });

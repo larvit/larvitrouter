@@ -1,46 +1,41 @@
 {
+  "name": "larvitrouter",
+  "version": "2.0.0",
+  "description": "URL router",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "larvitfs": "^1.0.1",
+    "test_module": "^0.0.1",
+    "winston": "^2.4.0"
+  },
+  "devDependencies": {
+    "coveralls": "^3.0.0",
+    "eslint": "^4.13.0",
+    "istanbul": "^0.4.5",
+    "tape": "^4.8.0",
+    "tape-eslint": "^1.2.1"
+  },
+  "scripts": {
+    "test": "./node_modules/tape/bin/tape ./test/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/larvit/larvitrouter.git"
+  },
+  "keywords": [
+    "router"
+  ],
   "author": {
     "name": "Mikael 'Lilleman' Göransson",
     "email": "lilleman@larvit.se",
-    "url": "http://github.com/larvit/larvitrouter"
+    "url": "http://github.com/larvit/larvitbase"
   },
-  "private": false,
-  "contributors": [],
-  "dependencies": {
-    "larvitfs": "^1.0.0",
-    "utils-merge": "^1.0.0",
-    "winston": "^2.2.0"
-  },
-  "description": "Router for node.js",
-  "devDependencies": {
-    "eslint": "^3.19.0",
-    "mocha": "^3.4.2",
-    "test_module": "file:test_module"
-  },
-  "keywords": [
-    "router",
-    "regexp",
-    "async"
-  ],
-  "main": "index.js",
-  "name": "larvitrouter",
-  "repository": {
-    "url": "https://github.com/larvit/larvitrouter",
-    "type": "git"
-  },
-  "version": "1.0.4",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/larvit/larvitrouter/issues"
   },
-  "homepage": "https://github.com/larvit/larvitrouter",
-  "scripts": {
-    "test": "mocha"
-  },
-  "license": "MIT",
-  "maintainers": [
-    {
-      "name": "lilleman",
-      "email": "lilleman@larvit.se"
-    }
-  ]
+  "homepage": "https://github.com/larvit/larvitrouter#readme"
 }
