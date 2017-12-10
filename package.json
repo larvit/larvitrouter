@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "larvitfs": "^1.0.1",
-    "test_module": "^0.0.1",
     "winston": "^2.4.0"
   },
   "devDependencies": {
@@ -16,7 +15,8 @@
     "eslint": "^4.13.0",
     "istanbul": "^0.4.5",
     "tape": "^4.8.0",
-    "tape-eslint": "^1.2.1"
+    "tape-eslint": "^1.2.1",
+		"test_module": "file:test_module"
   },
   "scripts": {
     "test": "./node_modules/tape/bin/tape ./test/*"
