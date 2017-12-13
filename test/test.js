@@ -109,7 +109,7 @@ test('Custom routes', function(t) {
 		if (err) throw err;
 
 		t.equal(result.controllerPath,	'some.js');
-		t.equal(result.controllerFullPath,	undefined);
+		t.equal(result.controllerFullPath,	false);
 		t.equal(result.templatePath,	undefined);
 		t.equal(result.templateFullPath,	undefined);
 		t.equal(result.staticPath,	undefined);

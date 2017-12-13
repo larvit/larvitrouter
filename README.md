@@ -3,7 +3,7 @@
 
 # URL router
 
-Route an URL to a controller or a static file, where controller is a filename in the "controllers" path and a static file is a filename in the "public" path.
+Route an URL to a controller, template and/or a static file. Makes use of [larvitfs](https://www.npmjs.com/package/larvitfs) cascading viritual filesystem.
 
 Auto resolves files like so:
 
