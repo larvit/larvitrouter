@@ -2,13 +2,17 @@
 
 const	Router	= require(__dirname + '/../index.js'),
 	path	= require('path'),
-	test	= require('tape');
+	test	= require('tape'),
+	log	= require('winston');
+
+// Set up winston
+log.remove(log.transports.Console);
 
 test('Resolve the default controller', function (t) {
-	const	router	= new Router();
+	const	router	= new Router({'basePath': __dirname + '/../'});
 
 	router.resolve('/', function (err, result) {
-		t.error(err);
+		if (err) throw err;
 
 		t.equal(result.controllerPath,	'default.js');
 		t.equal(result.controllerFullPath,	path.join(__dirname, '../node_modules/test_module/controllers/default.js'));
@@ -21,10 +25,10 @@ test('Resolve the default controller', function (t) {
 });
 
 test('Resolve nothing for URL with no matches', function (t) {
-	const	router	= new Router();
+	const	router	= new Router({'basePath': __dirname + '/../'});
 
 	router.resolve('/fasdf.txt', function (err, result) {
-		t.error(err);
+		if (err) throw err;
 
 		t.equal(result.controllerPath,	undefined);
 		t.equal(result.controllerFullPath,	undefined);
@@ -37,10 +41,10 @@ test('Resolve nothing for URL with no matches', function (t) {
 });
 
 test('Resolve static file', function (t) {
-	const	router	= new Router();
+	const	router	= new Router({'basePath': __dirname + '/../'});
 
-	router.resolve('/fasdf.txt', function (err, result) {
-		t.error(err);
+	router.resolve('/test.css', function (err, result) {
+		if (err) throw err;
 
 		t.equal(result.controllerPath,	undefined);
 		t.equal(result.controllerFullPath,	undefined);
@@ -53,10 +57,10 @@ test('Resolve static file', function (t) {
 });
 
 test('Auto resolve custom controller foo', function(t) {
-	const	router	= new Router();
+	const	router	= new Router({'basePath': __dirname + '/../'});
 
 	router.resolve('/foo', function (err, result) {
-		t.error(err);
+		if (err) throw err;
 
 		t.equal(result.controllerPath,	'foo.js');
 		t.equal(result.controllerFullPath,	path.join(__dirname, '../node_modules/test_module/controllers/foo.js'));
@@ -69,10 +73,10 @@ test('Auto resolve custom controller foo', function(t) {
 });
 
 test('Auto resolve custom controller bleh/blah', function(t) {
-	const	router	= new Router();
+	const	router	= new Router({'basePath': __dirname + '/../'});
 
 	router.resolve('/bleh/blah', function (err, result) {
-		t.error(err);
+		if (err) throw err;
 
 		t.equal(result.controllerPath,	'bleh/blah.js');
 		t.equal(result.controllerFullPath,	path.join(__dirname, '../node_modules/test_module/controllers/bleh/blah.js'));
@@ -85,7 +89,7 @@ test('Auto resolve custom controller bleh/blah', function(t) {
 });
 
 test('Fail gracefully when not given a path to resolve', function(t) {
-	const	router	= new Router();
+	const	router	= new Router({'basePath': __dirname + '/../'});
 
 	router.resolve({}, function (err) {
 		t.equal(err instanceof Error, true);
@@ -102,6 +106,8 @@ test('Custom routes', function(t) {
 	});
 
 	router.resolve('/flump.css', function (err, result) {
+		if (err) throw err;
+
 		t.equal(result.controllerPath,	'default.js');
 		t.equal(result.controllerFullPath,	path.join(__dirname, '../node_modules/test_module/controllers/default.js'));
 		t.equal(result.templatePath,	undefined);
@@ -110,4 +116,16 @@ test('Custom routes', function(t) {
 		t.equal(result.staticFullPath,	undefined);
 		t.end();
 	});
+});
+
+test('Default options', function (t) {
+	process.chdir(__dirname + '/../test_module');
+	(function () {
+		const	router	= new Router();
+
+		router.resolve('/test.css', function (err, result) {
+			t.equal(result.staticPath, 'test.css');
+			t.end();
+		});
+	})();
 });

@@ -37,6 +37,7 @@ Use custom options (the defaults are used in this example), all paths are relati
 ```javascript
 const Router = require('larvitrouter'),
       router = new Router({
+	'basePath':        process.cwd(),
 	'controllersPath': 'controllers',
 	'staticsPath':     'public',
 	'templatesPath':   'public/templates',

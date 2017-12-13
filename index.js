@@ -1,8 +1,7 @@
 'use strict';
 
 const	topLogPrefix	= 'larvitrouter: index.js: ',
-	path	= require('path'),
-	lfs	= require('larvitfs'),
+	Lfs	= require('larvitfs'),
 	log	= require('winston');
 
 function Router(options) {
@@ -10,22 +9,24 @@ function Router(options) {
 
 	let	defaultRouteFound	= false;
 
-	this.basePath	= path.dirname(process.cwd());
-
 	if ( ! options)	{ options	= {};	}
 	if ( ! options.controllersPath)	{ options.controllersPath	= 'controllers';	}
 	if ( ! options.staticsPath)	{ options.staticsPath	= 'public';	}
 	if ( ! options.templatesPath)	{ options.templatesPath	= 'public/templates';	}
 	if ( ! options.templateExts)	{ options.templateExts	= ['tmpl', 'tmp', 'ejs', 'pug'];	}
 	if ( ! options.routes)	{ options.routes	= [];	}
+	if ( ! options.basePath)	{ options.basePath	= process.cwd();	}
 
 	if ( ! Array.isArray(options.templateExts)) {
 		options.templateExts	= [options.templateExts];
 	}
 
+	this.options	= options;
+	this.lfs	= new Lfs({'basePath': options.basePath});
+
 	for (let i = 0; options.routes[i] !== undefined; i ++) {
 		if (options.routes[i].regex === '^/$') {
-			defaultRouteFound = true;
+			defaultRouteFound	= true;
 			break;
 		}
 	}
@@ -39,9 +40,7 @@ function Router(options) {
 		});
 	}
 
-	log.debug(logPrefix + 'Instantiated with basePath: "' + this.basePath + '" and options: ' + JSON.stringify(options));
-
-	this.options	= options;
+	log.debug(logPrefix + 'Instantiated with options: ' + JSON.stringify(options));
 }
 
 Router.prototype.resolve = function(urlStr, cb) {
@@ -85,8 +84,8 @@ Router.prototype.resolve = function(urlStr, cb) {
 	}
 
 	// If no route is matched, try to autoresolve stuff
-	if (Object.keys(result) === 0) {
-		if ( ! result.controllerPath && lfs.getPathSync(that.options.controllersPath + '/' + relUrlStr + '.js')) {
+	if (Object.keys(result).length === 0) {
+		if ( ! result.controllerPath && that.lfs.getPathSync(that.options.controllersPath + '/' + relUrlStr + '.js')) {
 			result.controllerPath	= relUrlStr + '.js';
 		}
 
@@ -94,13 +93,13 @@ Router.prototype.resolve = function(urlStr, cb) {
 			for (let i = 0; that.options.templateExts[i] !== undefined; i ++) {
 				const	tmplExt	= that.options.templateExts[i];
 
-				if (lfs.getPathSync(that.options.templatesPath + '/' + relUrlStr + '.' + tmplExt)) {
+				if (that.lfs.getPathSync(that.options.templatesPath + '/' + relUrlStr + '.' + tmplExt)) {
 					result.templatePath	= relUrlStr + '.' + tmplExt;
 				}
 			}
 		}
 
-		if ( ! result.staticPath && lfs.getPathSync(that.options.staticsPath + '/' + relUrlStr)) {
+		if ( ! result.staticPath && that.lfs.getPathSync(that.options.staticsPath + '/' + relUrlStr)) {
 			result.staticPath	= relUrlStr;
 		}
 	}
@@ -108,12 +107,14 @@ Router.prototype.resolve = function(urlStr, cb) {
 	// Set full paths where missing
 	for (const type of ['controller', 'template', 'static']) {
 		if (result[type + 'Path'] && ! result[type + 'FullPath']) {
-			result[type + 'FullPath']	= lfs.getPathSync(that.options[type + 'sPath'] + '/' + result[type + 'Path']);
+			result[type + 'FullPath']	= that.lfs.getPathSync(that.options[type + 'sPath'] + '/' + result[type + 'Path']);
 			if ( ! result[type + 'FullPath']) {
 				log.warn(logPrefix + 'Could not find full path for ' + type + 'Path: ' + result[type + 'Path']);
 			}
 		}
 	}
+
+	cb(null, result);
 };
 
 exports = module.exports = Router;
