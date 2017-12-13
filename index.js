@@ -89,13 +89,11 @@ Router.prototype.resolve = function(urlStr, cb) {
 			result.controllerPath	= relUrlStr + '.js';
 		}
 
-		if ( ! result.templatePath) {
-			for (let i = 0; that.options.templateExts[i] !== undefined; i ++) {
-				const	tmplExt	= that.options.templateExts[i];
+		for (let i = 0; that.options.templateExts[i] !== undefined; i ++) {
+			const	tmplExt	= that.options.templateExts[i];
 
-				if (that.lfs.getPathSync(that.options.templatesPath + '/' + relUrlStr + '.' + tmplExt)) {
-					result.templatePath	= relUrlStr + '.' + tmplExt;
-				}
+			if (that.lfs.getPathSync(that.options.templatesPath + '/' + relUrlStr + '.' + tmplExt)) {
+				result.templatePath	= relUrlStr + '.' + tmplExt;
 			}
 		}
 

@@ -32,7 +32,7 @@ const Router = require('larvitrouter'),
       router = new Router();
 ```
 
-Use custom options (the defaults are used in this example), all paths are relative to process.cwd():
+Use custom options (the defaults are used in this example):
 
 ```javascript
 const Router = require('larvitrouter'),
@@ -79,7 +79,7 @@ http.createServer(function(req, res) {
 			console.log('template full path: ' + result.templateFullPath);
 		}
 
-		res.end('Resolved stuff, se console output for details');
+		res.end('Resolved stuff, see console output for details');
 	})
 }).listen(8001);
 ```
