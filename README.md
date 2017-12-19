@@ -58,7 +58,7 @@ const Router = require('larvitrouter'),
       http   = require('http');
 
 http.createServer(function(req, res) {
-	router.resolve(req, function(err, result) {
+	router.resolve(req.url, function(err, result) {
 		if (err) throw err;
 
 		// A static file was found
