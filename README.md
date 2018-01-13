@@ -68,7 +68,7 @@ http.createServer(function(req, res) {
 		}
 
 		// A controller was found
-		if (result.controllerPath)
+		if (result.controllerPath) {
 			console.log('controller path: ' + result.controllerPath);
 			console.log('controller full path: ' + result.controllerFullPath);
 		}
