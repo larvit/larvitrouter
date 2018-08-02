@@ -43,7 +43,7 @@ function Router(options) {
 	log.debug(logPrefix + 'Instantiated with options: ' + JSON.stringify(options));
 }
 
-Router.prototype.resolve = function(urlStr, cb) {
+Router.prototype.resolve = function (urlStr, cb) {
 	const	logPrefix	= topLogPrefix + 'Router.prototype.resolve() - ',
 		result	= {},
 		that	= this;
@@ -51,7 +51,7 @@ Router.prototype.resolve = function(urlStr, cb) {
 	let	relUrlStr;
 
 	if (typeof cb !== 'function') {
-		cb = function () {};
+		cb	= function () {};
 	}
 
 	if (typeof urlStr !== 'string') {

@@ -56,7 +56,7 @@ test('Resolve static file', function (t) {
 	});
 });
 
-test('Auto resolve custom controller foo', function(t) {
+test('Auto resolve custom controller foo', function (t) {
 	const	router	= new Router({'basePath': __dirname + '/../'});
 
 	router.resolve('/foo', function (err, result) {
@@ -72,7 +72,7 @@ test('Auto resolve custom controller foo', function(t) {
 	});
 });
 
-test('Auto resolve custom controller bleh/blah', function(t) {
+test('Auto resolve custom controller bleh/blah', function (t) {
 	const	router	= new Router({'basePath': __dirname + '/../'});
 
 	router.resolve('/bleh/blah', function (err, result) {
@@ -88,7 +88,7 @@ test('Auto resolve custom controller bleh/blah', function(t) {
 	});
 });
 
-test('Fail gracefully when not given a path to resolve', function(t) {
+test('Fail gracefully when not given a path to resolve', function (t) {
 	const	router	= new Router({'basePath': __dirname + '/../'});
 
 	router.resolve({}, function (err) {
@@ -97,11 +97,11 @@ test('Fail gracefully when not given a path to resolve', function(t) {
 	});
 });
 
-test('Custom routes', function(t) {
-	const	router	= new Router({
+test('Custom routes', function (t) {
+	const router = new Router({
 		'routes': [{
-			'regex': '^/flump.css$',
-			'controllerPath': 'some.js'
+			'regex':	'^/flump.css$',
+			'controllerPath':	'some.js'
 		}]
 	});
 
