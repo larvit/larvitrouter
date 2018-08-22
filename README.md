@@ -35,13 +35,16 @@ const Router = require('larvitrouter'),
 Use custom options (the defaults are used in this example):
 
 ```javascript
-const Router = require('larvitrouter'),
-      router = new Router({
+const LUtils = require('larvitutils');
+const lUtils = new lUtils();
+const Router = require('larvitrouter');
+const router = new Router({
 	'basePath':        process.cwd(),
 	'controllersPath': 'controllers',
 	'staticsPath':     'public',
 	'templatesPath':   'public/templates',
 	'templateExts':    ['tmpl', 'tmp', 'ejs', 'pug']
+	'log':             new lUtils.Log(),
 	'routes': [{
 		'regex':          '^/$',
 		'controllerPath': 'default.js',
@@ -53,9 +56,9 @@ const Router = require('larvitrouter'),
 ## Resolve a path
 
 ```javascript
-const Router = require('larvitrouter'),
-      router = new Router(),
-      http   = require('http');
+const Router = require('larvitrouter');
+const router = new Router();
+const http   = require('http');
 
 http.createServer(function(req, res) {
 	router.resolve(req.url, function(err, result) {
