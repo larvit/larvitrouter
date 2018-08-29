@@ -8,14 +8,24 @@ const Lfs          = require('larvitfs');
  * Module main constructor
  *
  * @param {obj} options - {
- * 	'controllersPath': 'controllers',
- * 	'staticsPath':     'public',
- * 	'templatesPath':   'public/templates',
- * 	'templateExts':    ['tmpl', 'tmp', 'ejs', 'pug', 'vue'],
- * 	'routes':          [],
- * 	'basePath':        process.cwd(),
- * 	'log':             log object,
- * 	'lfs':             larvitfs instance
+ * 	'paths':           {
+ * 		'controller': {
+ * 			'path': 'controllers',
+ * 			'exts': 'js'
+ * 		},
+ * 		'static': {
+ * 			'path': 'public',
+ * 			'exts': false
+ * 		},
+ * 		'template': {
+ * 			'path': 'public/templates',
+ * 			'exts': ['tmpl', 'tmp', 'ejs', 'pug']
+ * 		}
+ * 	},
+ * 	'routes':   [],
+ * 	'basePath': process.cwd(),
+ * 	'log':      log object,
+ * 	'lfs':      larvitfs instance
  * }
  */
 function Router(options) {
@@ -26,12 +36,25 @@ function Router(options) {
 
 	that.options = options || {};
 
-	if (! that.options.controllersPath) that.options.controllersPath = 'controllers';
-	if (! that.options.staticsPath)     that.options.staticsPath     = 'public';
-	if (! that.options.templatesPath)   that.options.templatesPath   = 'public/templates';
-	if (! that.options.templateExts)    that.options.templateExts    = ['tmpl', 'tmp', 'ejs', 'pug', 'vue'];
-	if (! that.options.routes)          that.options.routes          = [];
-	if (! that.options.basePath)        that.options.basePath        = process.cwd();
+	if (! that.options.paths) {
+		that.options.paths = {
+			'controller': {
+				'path': 'controllers',
+				'exts': 'js'
+			},
+			'static': {
+				'path': 'public',
+				'exts': false
+			},
+			'template': {
+				'path': 'public/templates',
+				'exts': ['tmpl', 'tmp', 'ejs', 'pug']
+			}
+		};
+	}
+
+	if (! that.options.routes)   that.options.routes   = [];
+	if (! that.options.basePath) that.options.basePath = process.cwd();
 
 	if (! that.options.log) {
 		const lUtils = new LUtils();
@@ -39,8 +62,10 @@ function Router(options) {
 		that.options.log = new lUtils.Log();
 	}
 
-	if (! Array.isArray(that.options.templateExts)) {
-		that.options.templateExts = [that.options.templateExts];
+	for (const key of Object.keys(that.options.paths)) {
+		if (! Array.isArray(that.options.paths[key].exts) && that.options.paths[key].exts !== false) {
+			that.options.paths[key].exts = [that.options.paths[key].exts];
+		}
 	}
 
 	if (! that.options.lfs) {
@@ -101,12 +126,11 @@ Router.prototype.resolve = function (urlStr, cb) {
 		if (RegExp(that.routes[i].regex).test(urlStr)) {
 			that.log.debug(logPrefix + 'Matched custom route "' + that.routes[i].regex + '" to route: ' + JSON.stringify(that.routes[i]));
 
-			result.controllerPath     = that.routes[i].controllerPath;
-			result.controllerFullPath = that.routes[i].controllerFullPath;
-			result.templatePath       = that.routes[i].templatePath;
-			result.templateFullPath   = that.routes[i].templateFullPath;
-			result.staticPath         = that.routes[i].staticPath;
-			result.staticFullPath     = that.routes[i].staticFullPath;
+			for (const key of Object.keys(that.routes[i])) {
+				if (key !== 'regex') {
+					result[key]	= that.routes[i][key];
+				}
+			}
 
 			break; // Break execution, no need to go through the rest
 		}
@@ -114,27 +138,29 @@ Router.prototype.resolve = function (urlStr, cb) {
 
 	// If no route is matched, try to autoresolve stuff
 	if (Object.keys(result).length === 0) {
-		if (! result.controllerPath && that.lfs.getPathSync(that.controllersPath + '/' + relUrlStr + '.js')) {
-			result.controllerPath = relUrlStr + '.js';
-		}
+		for (const type of Object.keys(that.paths)) {
+			const routeOpts = that.paths[type];
 
-		for (let i = 0; that.templateExts[i] !== undefined; i ++) {
-			const tmplExt = that.templateExts[i];
+			if (! Array.isArray(routeOpts.exts) && that.lfs.getPathSync(routeOpts.path + '/' + relUrlStr)) {
+				result[type + 'Path'] = relUrlStr;
+			} else {
+				for (let i = 0; routeOpts.exts[i] !== undefined; i ++) {
+					const ext = routeOpts.exts[i];
 
-			if (that.lfs.getPathSync(that.templatesPath + '/' + relUrlStr + '.' + tmplExt)) {
-				result.templatePath = relUrlStr + '.' + tmplExt;
+					if (that.lfs.getPathSync(routeOpts.path + '/' + relUrlStr + '.' + ext)) {
+						result[type + 'Path'] = relUrlStr + '.' + ext;
+					}
+				}
 			}
-		}
-
-		if (! result.staticPath && that.lfs.getPathSync(that.staticsPath + '/' + relUrlStr)) {
-			result.staticPath = relUrlStr;
 		}
 	}
 
 	// Set full paths where missing
-	for (const type of ['controller', 'template', 'static']) {
+	for (const type of Object.keys(that.paths)) {
+		const routeOpts = that.paths[type];
+
 		if (result[type + 'Path'] && ! result[type + 'FullPath']) {
-			result[type + 'FullPath'] = that.lfs.getPathSync(that[type + 'sPath'] + '/' + result[type + 'Path']);
+			result[type + 'FullPath'] = that.lfs.getPathSync(routeOpts.path + '/' + result[type + 'Path']);
 			if (! result[type + 'FullPath']) {
 				that.log.warn(logPrefix + 'Could not find full path for ' + type + 'Path: ' + result[type + 'Path']);
 			}

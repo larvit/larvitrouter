@@ -152,9 +152,14 @@ test('Default options', function (t) {
 
 test('Custom controllersPath', function (t) {
 	const router = new Router({
-		'basePath':        __dirname + '/../test_module',
-		'controllersPath': 'altControllers',
-		'log':             log
+		'basePath': __dirname + '/../test_module',
+		'paths':    {
+			'controller': {
+				'path': 'altControllers',
+				'exts': 'js'
+			}
+		},
+		'log': log
 	});
 
 	router.resolve('/bar', function (err, result) {
@@ -172,9 +177,14 @@ test('Custom controllersPath', function (t) {
 
 test('Custom staticsPath', function (t) {
 	const router = new Router({
-		'basePath':    __dirname + '/../test_module',
-		'staticsPath': 'public/templates',
-		'log':         log
+		'basePath': __dirname + '/../test_module',
+		'paths':    {
+			'static': {
+				'path': 'public/templates',
+				'exts': false
+			}
+		},
+		'log': log
 	});
 
 	router.resolve('/default.tmpl', function (err, result) {
@@ -192,9 +202,18 @@ test('Custom staticsPath', function (t) {
 
 test('Custom templatesPath', function (t) {
 	const router = new Router({
-		'basePath':      __dirname + '/../test_module',
-		'templatesPath': 'public',
-		'log':           log
+		'basePath': __dirname + '/../test_module',
+		'paths':    {
+			'template': {
+				'path': 'public/templates',
+				'exts': ['tmpl', 'tpl']
+			},
+			'static': {
+				'path': 'public',
+				'exts': false
+			}
+		},
+		'log': log
 	});
 
 	router.resolve('/templates/default.tmpl', function (err, result) {
@@ -212,9 +231,14 @@ test('Custom templatesPath', function (t) {
 
 test('Custom templateExts', function (t) {
 	const	router	= new Router({
-		'basePath':     __dirname + '/../test_module',
-		'templateExts': 'rev',
-		'log':          log
+		'basePath': __dirname + '/../test_module',
+		'paths':    {
+			'template': {
+				'path': 'public/templates',
+				'exts': 'rev'
+			}
+		},
+		'log': log
 	});
 
 	router.resolve('balseqvick', function (err, result) {

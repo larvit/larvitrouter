@@ -37,14 +37,26 @@ Use custom options (the defaults are used in this example):
 ```javascript
 const LUtils = require('larvitutils');
 const lUtils = new lUtils();
+const Lfs    = require('larvitfs');
 const Router = require('larvitrouter');
 const router = new Router({
 	'basePath':        process.cwd(),
-	'controllersPath': 'controllers',
-	'staticsPath':     'public',
-	'templatesPath':   'public/templates',
-	'templateExts':    ['tmpl', 'tmp', 'ejs', 'pug']
-	'log':             new lUtils.Log(),
+	'lfs':             new Lfs({'basePath': process.cwd()}),
+	'paths':           {
+		'controller': {
+			'path': 'controllers',
+			'exts': 'js'
+		},
+		'static': {
+			'path': 'public',
+			'exts': false // Match all
+		},
+		'template': {
+			'path': 'public/templates',
+			'exts': ['tmpl', 'tmp', 'ejs', 'pug']
+		}
+	},
+	'log':    new lUtils.Log(),
 	'routes': [{
 		'regex':          '^/$',
 		'controllerPath': 'default.js',
