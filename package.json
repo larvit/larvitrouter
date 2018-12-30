@@ -1,6 +1,6 @@
 {
   "name": "larvitrouter",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "URL router",
   "main": "index.js",
   "directories": {
