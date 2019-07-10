@@ -2,6 +2,7 @@
 
 const topLogPrefix = 'larvitrouter: index.js: ';
 const LUtils = require('larvitutils');
+const path = require('path');
 const Lfs = require('larvitfs');
 
 /**
@@ -103,8 +104,6 @@ Router.prototype.resolve = function (urlStr, cb) {
 	const result = {};
 	const { log, routes, lfs } = this.options;
 
-	let relUrlStr;
-
 	if (typeof cb !== 'function') {
 		cb = () => {};
 	}
@@ -120,7 +119,14 @@ Router.prototype.resolve = function (urlStr, cb) {
 
 	log.debug(logPrefix + 'parsing URL ' + urlStr);
 
-	relUrlStr = urlStr[0] === '/' ? urlStr.substring(1) : urlStr;
+	const relUrlStr = path.normalize(urlStr[0] === '/' ? urlStr.substring(1) : urlStr);
+
+	// SECURITY! Someone is trying to find paths above the given route root
+	if (relUrlStr.startsWith('..')) {
+		log.info(logPrefix + 'Security! Stopped try to route a route above the route root: "' + relUrlStr);
+
+		return cb(null, result);
+	}
 
 	// Go through all custom routes to see if we have a match
 	for (let i = 0; this.routes[i] !== undefined; i++) {
