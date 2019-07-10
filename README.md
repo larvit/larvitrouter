@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/larvit/larvitrouter.svg?branch=master)](https://travis-ci.org/larvit/larvitrouter) [![Dependencies](https://david-dm.org/larvit/larvitrouter.svg)](https://david-dm.org/larvit/larvitrouter.svg)
+[![Build Status](https://travis-ci.org/larvit/larvitrouter.svg?branch=master)](https://travis-ci.org/larvit/larvitrouter) 
+[![Dependencies](https://david-dm.org/larvit/larvitrouter.svg)](https://david-dm.org/larvit/larvitrouter.svg)
 [![Coverage Status](https://coveralls.io/repos/larvit/larvitrouter/badge.svg)](https://coveralls.io/github/larvit/larvitrouter)
 
 # URL router
