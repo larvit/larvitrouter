@@ -1,42 +1,21 @@
 'use strict';
 
-const LUtils = require('larvitutils');
-const lUtils = new LUtils();
+const { Log } = require('larvitutils');
 const Router = require(__dirname + '/../index.js');
 const path = require('path');
 const test = require('tape');
-const Lfs = require('larvitfs');
-const log = new lUtils.Log('error');
+const log = new Log('error');
 
 test('Resolve the default controller', t => {
-	const router = new Router({ basePath: __dirname + '/../', log });
+	const router = new Router({ basePath: path.join(__dirname, '/test_www_root/'), log });
 
 	router.resolve('/', (err, result) => {
 		if (err) throw err;
 
 		t.equal(result.controllerPath, 'default.js');
-		t.equal(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/default.js'));
+		t.equal(result.controllerFullPath, path.join(__dirname, 'test_www_root/controllers/default.js'));
 		t.equal(result.templatePath, 'default.tmpl');
-		t.equal(result.templateFullPath, path.join(__dirname, '../node_modules/test_module/public/templates/default.tmpl'));
-		t.equal(result.staticPath, undefined);
-		t.equal(result.staticFullPath, undefined);
-		t.end();
-	});
-});
-
-test('Resolve the default controller, with custom lfs instance', t => {
-	const router = new Router({
-		lfs: new Lfs({ basePath: __dirname + '/../', log }),
-		log
-	});
-
-	router.resolve('/', (err, result) => {
-		if (err) throw err;
-
-		t.equal(result.controllerPath, 'default.js');
-		t.equal(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/default.js'));
-		t.equal(result.templatePath, 'default.tmpl');
-		t.equal(result.templateFullPath, path.join(__dirname, '../node_modules/test_module/public/templates/default.tmpl'));
+		t.equal(result.templateFullPath, path.join(__dirname, 'test_www_root/public/templates/default.tmpl'));
 		t.equal(result.staticPath, undefined);
 		t.equal(result.staticFullPath, undefined);
 		t.end();
@@ -44,7 +23,7 @@ test('Resolve the default controller, with custom lfs instance', t => {
 });
 
 test('Resolve nothing for URL with no matches', t => {
-	const router = new Router({ basePath: __dirname + '/../', log });
+	const router = new Router({ basePath: __dirname + '/test_www_root/', log });
 
 	router.resolve('/fasdf.txt', (err, result) => {
 		if (err) throw err;
@@ -60,7 +39,7 @@ test('Resolve nothing for URL with no matches', t => {
 });
 
 test('Resolve static file', t => {
-	const router = new Router({ basePath: __dirname + '/../', log });
+	const router = new Router({ basePath: __dirname + '/test_www_root/', log });
 
 	router.resolve('/test.css', (err, result) => {
 		if (err) throw err;
@@ -70,19 +49,19 @@ test('Resolve static file', t => {
 		t.equal(result.templatePath, undefined);
 		t.equal(result.templateFullPath, undefined);
 		t.equal(result.staticPath, 'test.css');
-		t.equal(result.staticFullPath, path.join(__dirname, '../node_modules/test_module/public/test.css'));
+		t.equal(result.staticFullPath, path.join(__dirname, 'test_www_root/public/test.css'));
 		t.end();
 	});
 });
 
 test('Auto resolve custom controller foo', t => {
-	const router = new Router({ basePath: __dirname + '/../', log });
+	const router = new Router({ basePath: __dirname + '/test_www_root/', log });
 
 	router.resolve('/foo', (err, result) => {
 		if (err) throw err;
 
 		t.equal(result.controllerPath, 'foo.js');
-		t.equal(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/foo.js'));
+		t.equal(result.controllerFullPath, path.join(__dirname, 'test_www_root/controllers/foo.js'));
 		t.equal(result.templatePath, undefined);
 		t.equal(result.templateFullPath, undefined);
 		t.equal(result.staticPath, undefined);
@@ -92,13 +71,13 @@ test('Auto resolve custom controller foo', t => {
 });
 
 test('Auto resolve custom controller bleh/blah', t => {
-	const router = new Router({ basePath: __dirname + '/../', log });
+	const router = new Router({ basePath: __dirname + '/test_www_root/', log });
 
 	router.resolve('/bleh/blah', (err, result) => {
 		if (err) throw err;
 
 		t.equal(result.controllerPath, 'bleh/blah.js');
-		t.equal(result.controllerFullPath, path.join(__dirname, '../node_modules/test_module/controllers/bleh/blah.js'));
+		t.equal(result.controllerFullPath, path.join(__dirname, 'test_www_root/controllers/bleh/blah.js'));
 		t.equal(result.templatePath, undefined);
 		t.equal(result.templateFullPath, undefined);
 		t.equal(result.staticPath, undefined);
@@ -108,7 +87,7 @@ test('Auto resolve custom controller bleh/blah', t => {
 });
 
 test('Fail gracefully when not given a path to resolve', t => {
-	const router = new Router({ basePath: __dirname + '/../', log });
+	const router = new Router({ basePath: __dirname + '/test_www_root/', log });
 
 	router.resolve({}, err => {
 		t.equal(err instanceof Error, true);
@@ -139,7 +118,7 @@ test('Custom routes', t => {
 });
 
 test('Default options', t => {
-	process.chdir(__dirname + '/../test_module');
+	process.chdir(__dirname + '/test_www_root');
 	(function () {
 		const router = new Router();
 
@@ -152,7 +131,7 @@ test('Default options', t => {
 
 test('Custom controllersPath', t => {
 	const router = new Router({
-		basePath: __dirname + '/../test_module',
+		basePath: __dirname + '/test_www_root',
 		paths: {
 			controller: {
 				path: 'altControllers',
@@ -166,7 +145,7 @@ test('Custom controllersPath', t => {
 		if (err) throw err;
 
 		t.equal(result.controllerPath, 'bar.js');
-		t.equal(result.controllerFullPath, path.join(__dirname, '../test_module/altControllers/bar.js'));
+		t.equal(result.controllerFullPath, path.join(__dirname, 'test_www_root/altControllers/bar.js'));
 		t.equal(result.templatePath, undefined);
 		t.equal(result.templateFullPath, undefined);
 		t.equal(result.staticPath, undefined);
@@ -177,7 +156,7 @@ test('Custom controllersPath', t => {
 
 test('Custom staticsPath', t => {
 	const router = new Router({
-		basePath: __dirname + '/../test_module',
+		basePath: __dirname + '/test_www_root',
 		paths: {
 			static: {
 				path: 'public/templates',
@@ -195,14 +174,14 @@ test('Custom staticsPath', t => {
 		t.equal(result.templatePath, undefined);
 		t.equal(result.templateFullPath, undefined);
 		t.equal(result.staticPath, 'default.tmpl');
-		t.equal(result.staticFullPath, path.join(__dirname, '../test_module/public/templates/default.tmpl'));
+		t.equal(result.staticFullPath, path.join(__dirname, 'test_www_root/public/templates/default.tmpl'));
 		t.end();
 	});
 });
 
 test('Custom templatesPath', t => {
 	const router = new Router({
-		basePath: __dirname + '/../test_module',
+		basePath: __dirname + '/test_www_root',
 		paths: {
 			template: {
 				path: 'public/templates',
@@ -224,14 +203,14 @@ test('Custom templatesPath', t => {
 		t.equal(result.templatePath, undefined);
 		t.equal(result.templateFullPath, undefined);
 		t.equal(result.staticPath, 'templates/default.tmpl');
-		t.equal(result.staticFullPath, path.join(__dirname, '../test_module/public/templates/default.tmpl'));
+		t.equal(result.staticFullPath, path.join(__dirname, 'test_www_root/public/templates/default.tmpl'));
 		t.end();
 	});
 });
 
 test('Custom templateExts', t => {
 	const router = new Router({
-		basePath: __dirname + '/../test_module',
+		basePath: __dirname + '/test_www_root',
 		paths: {
 			template: {
 				path: 'public/templates',
@@ -247,7 +226,7 @@ test('Custom templateExts', t => {
 		t.equal(result.controllerPath, undefined);
 		t.equal(result.controllerFullPath, undefined);
 		t.equal(result.templatePath, 'balseqvick.rev');
-		t.equal(result.templateFullPath, path.join(__dirname, '../test_module/public/templates/balseqvick.rev'));
+		t.equal(result.templateFullPath, path.join(__dirname, 'test_www_root/public/templates/balseqvick.rev'));
 		t.equal(result.staticPath, undefined);
 		t.equal(result.staticFullPath, undefined);
 		t.end();
@@ -256,7 +235,7 @@ test('Custom templateExts', t => {
 
 test('Custom default route', t => {
 	const router = new Router({
-		basePath: __dirname + '/../test_module',
+		basePath: __dirname + '/test_www_root',
 		log,
 		routes: [
 			{
@@ -271,9 +250,9 @@ test('Custom default route', t => {
 		if (err) throw err;
 
 		t.equal(result.controllerPath, 'foo.js');
-		t.equal(result.controllerFullPath, path.join(__dirname, '../test_module/controllers/foo.js'));
+		t.equal(result.controllerFullPath, path.join(__dirname, 'test_www_root/controllers/foo.js'));
 		t.equal(result.templatePath, 'balseqvick.tmpl');
-		t.equal(result.templateFullPath, path.join(__dirname, '../test_module/public/templates/balseqvick.tmpl'));
+		t.equal(result.templateFullPath, path.join(__dirname, 'test_www_root/public/templates/balseqvick.tmpl'));
 		t.equal(result.staticPath, undefined);
 		t.equal(result.staticFullPath, undefined);
 		t.end();
@@ -282,7 +261,7 @@ test('Custom default route', t => {
 
 test('SECURITY - Should not get files above the paths root', t => {
 	const router = new Router({
-		basePath: __dirname + '/../test_module',
+		basePath: __dirname + '/test_www_root',
 		log,
 		paths: {
 			grej: {

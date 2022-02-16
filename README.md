@@ -4,7 +4,7 @@
 
 # URL router
 
-Route an URL to a controller, template and/or a static file. Makes use of [larvitfs](https://www.npmjs.com/package/larvitfs) cascading viritual filesystem.
+Route an URL to a controller, template and/or a static file.
 
 Auto resolves files like so:
 
@@ -38,11 +38,9 @@ Use custom options (the defaults are used in this example):
 ```javascript
 const LUtils = require('larvitutils');
 const lUtils = new lUtils();
-const Lfs    = require('larvitfs');
 const Router = require('larvitrouter');
 const router = new Router({
 	'basePath':        process.cwd(),
-	'lfs':             new Lfs({'basePath': process.cwd()}),
 	'paths':           {
 		'controller': {
 			'path': 'controllers',
@@ -99,3 +97,7 @@ http.createServer(function(req, res) {
 	})
 }).listen(8001);
 ```
+
+# Changelog
+## 5.0.0
+- Removed larvitfs support
