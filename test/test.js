@@ -22,6 +22,23 @@ test('Resolve the default controller', t => {
 	});
 });
 
+test('Resolve twice to exercise cache usage', t => {
+	const router = new Router({ basePath: path.join(__dirname, '/test_www_root/'), log });
+	router.resolve('/', () => {
+		router.resolve('/', (err, result) => {
+			if (err) throw err;
+
+			t.equal(result.controllerPath, 'default.js');
+			t.equal(result.controllerFullPath, path.join(__dirname, 'test_www_root/controllers/default.js'));
+			t.equal(result.templatePath, 'default.tmpl');
+			t.equal(result.templateFullPath, path.join(__dirname, 'test_www_root/public/templates/default.tmpl'));
+			t.equal(result.staticPath, undefined);
+			t.equal(result.staticFullPath, undefined);
+			t.end();
+		});
+	});
+});
+
 test('Resolve nothing for URL with no matches', t => {
 	const router = new Router({ basePath: __dirname + '/test_www_root/', log });
 

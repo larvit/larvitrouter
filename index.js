@@ -138,7 +138,7 @@ class Router {
 		if (cachedResult !== undefined) {
 			log.debug(logPrefix + 'Found router entry in cache, urlStr: ' + urlStr);
 
-			return cachedResult;
+			return cb(null, cachedResult);
 		}
 
 		// Go through all custom routes to see if we have a match
