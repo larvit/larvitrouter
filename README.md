@@ -41,6 +41,7 @@ const lUtils = new lUtils();
 const Router = require('larvitrouter');
 const router = new Router({
 	'basePath':        process.cwd(),
+	'cacheMax':        1000
 	'paths':           {
 		'controller': {
 			'path': 'controllers',
@@ -99,5 +100,7 @@ http.createServer(function(req, res) {
 ```
 
 # Changelog
+## 5.1.0
+- Added cache layer
 ## 5.0.0
 - Removed larvitfs support

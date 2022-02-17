@@ -2,6 +2,7 @@
 
 const topLogPrefix = 'larvitrouter: index.js: ';
 const { Log } = require('larvitutils');
+const LRU = require('lru-cache');
 const path = require('path');
 const fs = require('fs');
 
@@ -12,6 +13,7 @@ class Router {
 	 *
 	 * @param {obj} options - {
 	 *  basePath: process.cwd(),
+	 *  cacheMax: 1000,
 	 *  paths: {
 	 *    controller: {
 	 *      path': 'controllers',
@@ -90,16 +92,16 @@ class Router {
 			this[key] = options[key];
 		}
 
+		this.cache = new LRU({ max: options.cacheMax || 5000 });
+
 		log.debug(logPrefix + 'Instantiated with options: ' + JSON.stringify(options));
 	}
 
 	getFullPath(relPath) {
 		const fullPath = path.join(this.basePath, relPath);
-		if (fs.existsSync(fullPath)) {
-			return fullPath;
-		}
+		const result = fs.existsSync(fullPath) ? fullPath : false;
 
-		return false;
+		return result;
 	}
 
 	resolve(urlStr, cb) {
@@ -129,6 +131,14 @@ class Router {
 			log.info(logPrefix + 'Security! Stopped try to route a route above the route root: "' + relUrlStr);
 
 			return cb(null, result);
+		}
+
+		// Check cache and return if found
+		const cachedResult = this.cache.get(relUrlStr);
+		if (cachedResult !== undefined) {
+			log.debug(logPrefix + 'Found router entry in cache, urlStr: ' + urlStr);
+
+			return cachedResult;
 		}
 
 		// Go through all custom routes to see if we have a match
@@ -179,6 +189,7 @@ class Router {
 			}
 		}
 
+		this.cache.set(relUrlStr, result);
 		cb(null, result);
 	}
 }
