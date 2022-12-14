@@ -6,6 +6,13 @@ const path = require('path');
 const test = require('tape');
 const log = new Log('error');
 
+test('Construct with circular JSON as log option should not crash (happen when winston is used as log instance)', t => {
+	const testLog = new Log('error');
+	testLog.circular = testLog;
+	new Router({ basePath: path.join(__dirname, '/test_www_root/'), log: testLog });
+	t.end();
+});
+
 test('Resolve the default controller', t => {
 	const router = new Router({ basePath: path.join(__dirname, '/test_www_root/'), log });
 

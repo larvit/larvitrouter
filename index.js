@@ -94,7 +94,9 @@ class Router {
 
 		this.cache = new LRU({ max: options.cacheMax || 5000 });
 
-		log.debug(logPrefix + 'Instantiated with options: ' + JSON.stringify(options));
+		// eslint-disable-next-line no-unused-vars
+		const {log: unused, ...optionsWithoutLog} = options;
+		log.debug(logPrefix + 'Instantiated with options: ' + JSON.stringify(optionsWithoutLog));
 	}
 
 	getFullPath(relPath) {
