@@ -1,6 +1,6 @@
 {
   "name": "larvitrouter",
-  "version": "5.1.62",
+  "version": "5.1.63",
   "description": "URL router",
   "main": "index.js",
   "directories": {
@@ -11,7 +11,7 @@
     "lru-cache": "^8.0.0"
   },
   "devDependencies": {
-    "eslint": "8.54.0",
+    "eslint": "8.55.0",
     "nyc": "15.1.0",
     "tape": "5.7.2"
   },
