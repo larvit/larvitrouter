@@ -1,19 +1,19 @@
 {
   "name": "larvitrouter",
-  "version": "5.1.85",
+  "version": "5.1.86",
   "description": "URL router",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "larvitutils": "5.1.92",
+    "larvitutils": "5.1.94",
     "lru-cache": "^8.0.0"
   },
   "devDependencies": {
     "eslint": "8.57.0",
     "nyc": "17.0.0",
-    "tape": "5.7.5"
+    "tape": "5.8.1"
   },
   "scripts": {
     "lint": "eslint *.js test/*.js",
