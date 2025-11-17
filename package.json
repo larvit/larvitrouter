@@ -1,13 +1,13 @@
 {
   "name": "larvitrouter",
-  "version": "5.1.131",
+  "version": "5.1.132",
   "description": "URL router",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "larvitutils": "5.1.168",
+    "larvitutils": "5.1.170",
     "lru-cache": "^8.0.0"
   },
   "devDependencies": {
